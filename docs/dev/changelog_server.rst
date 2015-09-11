@@ -11,6 +11,9 @@ v0.8.0 - not yet released
 * 245: Add option to retreive the course progress only - https://github.com/DigitalCampus/django-oppia/issues/issue/245
 * 252: Cohorts - UI to add courses to a cohort - https://github.com/DigitalCampus/django-oppia/issues/issue/252
 * 251: Date/time field on cohort form - use datepicker - https://github.com/DigitalCampus/django-oppia/issues/issue/251
+* 248: Add option to download the course file directly from the course listing page - https://github.com/DigitalCampus/django-oppia/issues/issue/248
+* 249: Add option to bulk upload students - https://github.com/DigitalCampus/django-oppia/issues/issue/249
+* 222: Add better titles for pages - https://github.com/DigitalCampus/django-oppia/issues/issue/222
 
 v0.7.5 - released 3 Jun 2015
 -----------------------------
