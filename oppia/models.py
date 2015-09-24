@@ -9,7 +9,7 @@ from django.db.models import Max, Sum, Q, F
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 
-from oppia.quiz.models import QuizAttempt
+from oppia.quiz.models import Quiz, QuizAttempt
 
 from tastypie.models import create_api_key
 
@@ -24,6 +24,29 @@ class UserProfile (models.Model):
     job_title = models.TextField(blank=True, null=True, default=None)
     organisation = models.TextField(blank=True, null=True, default=None)
     phone_number = models.TextField(blank=True, null=True, default=None)
+    
+    def get_can_upload(self):
+        if self.user.is_staff:
+            return True
+        return self.can_upload
+    
+    def is_student_only(self):
+        if self.user.is_staff:
+            return False
+        teach = Participant.objects.filter(user=self.user,role=Participant.TEACHER).count()
+        if teach > 0:
+            return False
+        else:
+            return True
+        
+    def is_teacher_only(self):
+        if self.user.is_staff:
+            return False
+        teach = Participant.objects.filter(user=self.user,role=Participant.TEACHER).count()
+        if teach > 0:
+            return True
+        else:
+            return False
     
 class Course(models.Model):
     user = models.ForeignKey(User)
@@ -95,7 +118,7 @@ class Course(models.Model):
                                       tracker_date__gte=last_week).count()
                                       
     def has_quizzes(self):
-        quiz_count = Activity.objects.filter(section__course=self,type='quiz').count()
+        quiz_count = Activity.objects.filter(section__course=self,type=Activity.QUIZ).count()
         if quiz_count > 0:
             return True
         else:
@@ -118,6 +141,47 @@ class Course(models.Model):
     def sections(self):
         sections = Section.objects.filter(course=self).order_by('order')
         return sections
+    
+    def get_no_activities(self):
+        return Activity.objects.filter(section__course=self, baseline=False).count()
+    
+    def get_no_quizzes(self):
+        return Activity.objects.filter(section__course=self,type=Activity.QUIZ,baseline=False).count()
+    
+    @staticmethod
+    def get_pre_test_score(course,user):
+        try:
+            baseline = Activity.objects.get(section__course=course,type=Activity.QUIZ,section__order=0)
+        except Activity.DoesNotExist:
+            return None
+        
+        quiz = Quiz.objects.get(quizprops__value=baseline.digest, quizprops__name="digest")
+        attempts = QuizAttempt.objects.filter(quiz=quiz, user=user)
+        if attempts.count() != 0:
+            max_score = 100*float(attempts.aggregate(max=Max('score'))['max']) / float(attempts[0].maxscore)
+            return max_score
+        else:
+            return None
+    
+    @staticmethod
+    def get_no_quizzes_completed(course,user):
+        acts = Activity.objects.filter(section__course=course,baseline=False, type=Activity.QUIZ).values_list('digest')
+        return Tracker.objects.filter(course=course,user=user,completed=True,digest__in=acts).values_list('digest').distinct().count()
+    
+    @staticmethod
+    def get_activities_completed(course,user):
+        acts = Activity.objects.filter(section__course=course,baseline=False).values_list('digest')
+        return Tracker.objects.filter(course=course,user=user,completed=True,digest__in=acts).values_list('digest').distinct().count()
+    
+    @staticmethod
+    def get_points(course,user):
+        points = Points.objects.filter(course=course,user=user).aggregate(total=Sum('points'))
+        return points['total']
+    
+    @staticmethod
+    def get_badges(course,user):
+        return Award.objects.filter(user=user,awardcourse__course=course).count()
+        
  
 class CourseManager(models.Model):
     course = models.ForeignKey(Course)
@@ -220,6 +284,11 @@ class Section(models.Model):
         return activities
     
 class Activity(models.Model):
+    QUIZ = 'quiz'
+    ACTIVITY_TYPES = (
+        (QUIZ, 'Quiz'),
+    )
+    
     section = models.ForeignKey(Section)
     order = models.IntegerField()
     title = models.TextField(blank=False)
@@ -510,6 +579,22 @@ class Cohort(models.Model):
         courses = Course.objects.filter(coursecohort__cohort = self).order_by('title')
         return courses
 
+    def get_leaderboard(self, count=0):
+        users = User.objects.filter(participant__cohort=self, 
+                                    participant__role=Participant.STUDENT, 
+                                    points__course__coursecohort__cohort=self) \
+                            .annotate(total=Sum('points__points')) \
+                            .order_by('-total')
+         
+        if count != 0:
+            users = users[:count]
+   
+        for u in users:
+            u.badges = Award.objects.filter(user=u, awardcourse__course__coursecohort__cohort=self).count()
+            if u.total is None:
+                u.total = 0
+        return users
+    
 class CourseCohort(models.Model):
     course = models.ForeignKey(Course) 
     cohort = models.ForeignKey(Cohort)  
@@ -645,24 +730,6 @@ class Points(models.Model):
                 u.total = 0
         return users
     
-    @staticmethod
-    def get_cohort_leaderboard(count, cohort):
-        users = User.objects.filter(participant__cohort=cohort, participant__role=Participant.STUDENT)
-        
-        courses = Course.objects.filter(coursecohort__cohort=cohort)
-        if courses is not None:
-            users = users.filter(points__course__in=courses)
-               
-        if count == 0:
-            users = users.annotate(total=Sum('points__points')).order_by('-total')
-        else:
-            users = users.annotate(total=Sum('points__points')).order_by('-total')[:count]
-            
-        #for u in users:
-        #    u.badges = Award.get_userawards(u,course)
-        #    if u.total is None:
-        #        u.total = 0
-        return users
     
     @staticmethod
     def get_userscore(user):
