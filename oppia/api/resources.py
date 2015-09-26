@@ -152,12 +152,37 @@ class RegisterResource(ModelResource):
                 bundle.data[r]
             except KeyError:
                 raise BadRequest(_(u'Please enter your %s') % r)
-        data = {'username': bundle.data['username'],
-                'password': bundle.data['password'],
+            
+        username = bundle.data['username']
+        password = bundle.data['password']
+        email = bundle.data['email']
+        first_name = bundle.data['firstname']
+        last_name = bundle.data['lastname']
+            
+        data = {'username': username,
+                'password': password,
                 'password_again': bundle.data['passwordagain'],
-                'email': bundle.data['email'],
-                'first_name': bundle.data['firstname'],
-                'last_name': bundle.data['lastname'],}
+                'email': email,
+                'first_name': first_name,
+                'last_name': last_name,}
+        
+        # check if user exists already
+        try:
+            user = User.objects.get(username=username)
+            key = ApiKey.objects.get(user = user)
+            bundle.obj = user
+            bundle.obj.first_name = first_name
+            bundle.obj.last_name = last_name
+            bundle.obj.save()
+            bundle.data['api_key'] = key.key
+            del bundle.data['passwordagain']
+            del bundle.data['password']
+            del bundle.data['firstname']
+            del bundle.data['lastname']
+            return bundle
+        except User.DoesNotExist:
+            pass
+        
         rf = RegisterForm(data)
         if not rf.is_valid():
             str = ""
@@ -165,12 +190,7 @@ class RegisterResource(ModelResource):
                 for error in value:
                     str += error + "\n"
             raise BadRequest(str)
-        else:
-            username = bundle.data['username']
-            password = bundle.data['password']
-            email = bundle.data['email']
-            first_name = bundle.data['firstname']
-            last_name = bundle.data['lastname']
+           
         try:
             bundle.obj = User.objects.create_user(username, email, password)
             bundle.obj.first_name = first_name
