@@ -24,7 +24,14 @@ class UserProfile (models.Model):
     job_title = models.TextField(blank=True, null=True, default=None)
     organisation = models.TextField(blank=True, null=True, default=None)
     phone_number = models.TextField(blank=True, null=True, default=None)
-    
+    # ischool specific starts
+    profession = models.TextField(blank=True, null=True, default=None)
+    years_in_service = models.TextField(blank=True, null=True, default=None)
+    province = models.TextField(blank=True, null=True, default=None)
+    district = models.TextField(blank=True, null=True, default=None)
+    facility = models.TextField(blank=True, null=True, default=None)
+    # ischool specific ends
+
     def get_can_upload(self):
         if self.user.is_staff:
             return True
