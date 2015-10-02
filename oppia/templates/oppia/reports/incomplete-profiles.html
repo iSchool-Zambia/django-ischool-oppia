@@ -1,0 +1,50 @@
+{% extends "base.html" %} 
+{% load i18n %} 
+{% load display_functions %} 
+
+{% block extra_head_title %}
+	{% trans 'Incomplete Profiles' %}
+{% endblock extra_head_title %}
+
+{% block content %}
+<h2>{% trans 'Incomplete Profiles' %}</h2>
+{% blocktrans %}
+<p>The following users do not have a complete profile, likely due to not being pre-registered on the server.</p>
+<p>You can use the links below to complete their profiles.</p>
+{% endblocktrans %}
+
+{% if users %}
+	<div class="table-responsive">
+         <table class="table table-striped">
+         	 <thead>
+                <tr>
+                  <th>#</th>
+                  <th>{% trans 'Username (NRC)' %}</th>
+                  <th>{% trans 'First name' %}</th>
+                  <th>{% trans 'Last name' %}</th>
+                  <th>{% trans 'Options' %}</th>
+                </tr>
+              </thead>
+              <tbody>
+              {% for user in users %}
+              	<tr>
+					<td>{{ forloop.counter }}</td>
+					<td>{{ user.username }}</td>
+					<td>{{ user.first_name }}</td>
+					<td>{{ user.last_name }}</td>
+					<td>
+						<a href="{% url 'profile_user_activity' user.id %}">{% trans 'View activity' %}</a> |
+						<a href="{% url 'profile_edit_user' user.id %}">{% trans 'Edit' %}</a>
+					</td>
+				</tr>
+              {% endfor %}
+              </tbody>
+ 		</table>
+	</div>
+
+{% else %}
+	{% blocktrans %}
+		<p>All users have a full user profile.</p>
+	{% endblocktrans %}
+{% endif %} 
+{% endblock %}
