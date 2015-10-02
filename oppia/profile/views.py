@@ -151,12 +151,22 @@ def edit(request, user_id=0):
                 user_profile = UserProfile.objects.get(user=view_user)
                 user_profile.job_title = form.cleaned_data.get("job_title")
                 user_profile.organisation = form.cleaned_data.get("organisation")
+                user_profile.profession = form.cleaned_data.get("profession")
+                user_profile.years_in_service = form.cleaned_data.get("years_in_service")
+                user_profile.province = form.cleaned_data.get("province")
+                user_profile.district = form.cleaned_data.get("district")
+                user_profile.facility = form.cleaned_data.get("facility")
                 user_profile.save()
             except UserProfile.DoesNotExist:
                 user_profile = UserProfile()
                 user_profile.user = view_user
                 user_profile.job_title = form.cleaned_data.get("job_title")
                 user_profile.organisation = form.cleaned_data.get("organisation")
+                user_profile.profession = form.cleaned_data.get("profession")
+                user_profile.years_in_service = form.cleaned_data.get("years_in_service")
+                user_profile.province = form.cleaned_data.get("province")
+                user_profile.district = form.cleaned_data.get("district")
+                user_profile.facility = form.cleaned_data.get("facility")
                 user_profile.save()
             messages.success(request, _(u"Profile updated"))
             
@@ -177,7 +187,12 @@ def edit(request, user_id=0):
                                     'last_name':view_user.last_name,
                                     'api_key': key.key,
                                     'job_title': user_profile.job_title,
-                                    'organisation': user_profile.organisation,})
+                                    'organisation': user_profile.organisation,
+                                    'profession': user_profile.profession,
+                                    'years_in_service': user_profile.years_in_service,
+                                    'province': user_profile.province,
+                                    'district': user_profile.district,
+                                    'facility': user_profile.facility,})
         
     return render_to_response( 
                   'oppia/profile/profile.html', 

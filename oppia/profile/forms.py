@@ -78,9 +78,14 @@ class RegisterForm(forms.Form):
                                                 'min_length': _(u'Your last name should be at least 2 characters long.')},
                                 min_length=2,
                                 required=True)
-    job_title = forms.CharField(max_length=100,required=False)
-    organisation = forms.CharField(max_length=100,required=False)
-
+    job_title = forms.CharField(max_length=100,required=True)
+    organisation = forms.CharField(max_length=100,required=True)
+    profession = forms.CharField(max_length=100,required=True)
+    years_in_service = forms.CharField(max_length=100,required=True)
+    province = forms.CharField(max_length=100,required=True)
+    district = forms.CharField(max_length=100,required=True)
+    facility = forms.CharField(max_length=100,required=True)
+    
     def __init__(self, *args, **kwargs):
         super(RegisterForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
@@ -97,6 +102,11 @@ class RegisterForm(forms.Form):
                                     'last_name',
                                     'job_title',
                                     'organisation',
+                                    'profession',
+                                    'years_in_service',
+                                    'province',
+                                    'district',
+                                    'facility',
                                 Div(
                                    Submit('submit', _(u'Register'), css_class='btn btn-default'),
                                    css_class='col-lg-offset-2 col-lg-4',
@@ -182,8 +192,13 @@ class ProfileForm(forms.Form):
     last_name = forms.CharField(max_length=100,
                                 min_length=2,
                                 required=True)
-    job_title = forms.CharField(max_length=100,required=False)
-    organisation = forms.CharField(max_length=100,required=False)
+    job_title = forms.CharField(max_length=100,required=True)
+    organisation = forms.CharField(max_length=100,required=True)
+    profession = forms.CharField(max_length=100,required=True)
+    years_in_service = forms.CharField(max_length=100,required=True)
+    province = forms.CharField(max_length=100,required=True)
+    district = forms.CharField(max_length=100,required=True)
+    facility = forms.CharField(max_length=100,required=True)
     
     def __init__(self, *args, **kwargs):
         super(ProfileForm, self).__init__(*args, **kwargs)
@@ -222,6 +237,11 @@ class ProfileForm(forms.Form):
                     'last_name',
                     'job_title',
                     'organisation',
+                    'profession',
+                    'years_in_service',
+                    'province',
+                    'district',
+                    'facility',
                     Div(
                         HTML("""<h3>"""+_(u'Change password') + """</h3>"""),
                         ),
