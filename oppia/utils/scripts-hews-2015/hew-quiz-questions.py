@@ -52,6 +52,9 @@ def run():
             print ("Processing: %s - %s"  % (title_lang(quiz.title,"en"), desc))
             out_file.write("</tr>")
             
+            print q.digest
+            print q.id
+            
             # get questions for quiz
             questions = Question.objects.filter(quizquestion__quiz=quiz).exclude(type='description').order_by("quizquestion__order")
             for qu in questions:
@@ -78,7 +81,10 @@ def run():
                 
                 out_file.write("<td>%d</td>" % qars.count())
                 out_file.write("<td>%d (%d%%)</td>" % (incorrect, incorrect*100/qars.count()))
-                out_file.write("<td>%d (%d%%)</td>" % (partial, partial*100/qars.count()))
+                if qu.type == 'multichoice':
+                    out_file.write("<td>-</td>")
+                else: 
+                    out_file.write("<td>%d (%d%%)</td>" % (partial, partial*100/qars.count()))
                 out_file.write("<td>%d (%d%%)</td>" % (correct, correct*100/qars.count()))
                 
                 
@@ -103,6 +109,9 @@ def run():
                 for bt in bottom_third:
                     if bt.score == 1:
                         bottom_correct_count += 1
+                
+                print top_third.count()
+                print bottom_third.count()
                 
                 d_score = (top_correct_count - bottom_correct_count) * 2.0 / (top_third.count() + bottom_third.count())
                 out_file.write("<td>%.3f</td>" % (d_score))
