@@ -1,7 +1,18 @@
 {% extends "base.html" %} 
 {% load i18n %} 
 
+{% block extra_head_title %}
+	{% trans 'About' %}
+{% endblock extra_head_title %}
+
 {% block content %}
 
 <h2>{% trans 'About' %}</h2>
+
+{% blocktrans %} 
+<p>iSchool Zambia is brought to you by <a href="http://ischool.zm/">iSchool</a> and <a href="http://www.jhpiego.org/">Jhpiego</a>.</p>
+
+<p>iSchool Zambia is built on the open source <a href="https://digital-campus.org/oppiamobile/overview">OppiaMobile</a> learning platform from <a href="http://digital-campus.org">Digital Campus</a>.</p>
+{% endblocktrans %}
+ 
 {% endblock %}
