@@ -37,6 +37,9 @@ def server_view(request):
                               content_type="application/json", 
                               context_instance=RequestContext(request))
 
+def about_view(request):
+    return render_to_response('oppia/about.html',  
+                              context_instance=RequestContext(request))
 def home_view(request):
     activity = []
     if request.user.is_authenticated():
