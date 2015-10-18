@@ -31,7 +31,7 @@ from tastypie.validation import Validation
 from oppia.api.serializers import PrettyJSONSerializer, CourseJSONSerializer, UserJSONSerializer
 from oppia.models import Activity, Section, Tracker, Course, Media, Schedule, ActivitySchedule, Cohort, Tag, CourseTag
 from oppia.models import Points, Award, Badge, UserProfile
-from oppia.profile.forms import RegisterForm
+from oppia.profile.forms import RegisterForm, RegisterFormAPI
 from oppia.signals import course_downloaded
  
 class UserResource(ModelResource):
@@ -183,11 +183,12 @@ class RegisterResource(ModelResource):
         except User.DoesNotExist:
             pass
         
-        rf = RegisterForm(data)
+        rf = RegisterFormAPI(data)
         if not rf.is_valid():
             str = ""
             for key, value in rf.errors.items():
                 for error in value:
+                    print key, value
                     str += error + "\n"
             raise BadRequest(str)
            
