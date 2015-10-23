@@ -39,7 +39,9 @@ def server_view(request):
 
 def about_view(request):
     return render_to_response('oppia/about.html',  
+                              {'settings': settings}, 
                               context_instance=RequestContext(request))
+    
 def home_view(request):
     activity = []
     if request.user.is_authenticated():
@@ -200,11 +202,6 @@ def tag_courses_view(request, tag_id):
                               {'courses_list': courses_list, 
                                'tag_list': tag_list, 
                                'current_tag': id}, 
-                              context_instance=RequestContext(request))
-           
-def terms_view(request):
-    return render_to_response('oppia/terms.html', 
-                              {'settings': settings}, 
                               context_instance=RequestContext(request))
         
 def upload_step1(request):

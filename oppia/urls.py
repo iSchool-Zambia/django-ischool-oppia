@@ -34,6 +34,7 @@ urlpatterns = patterns('',
     url(r'^$', 'oppia.views.home_view', name="oppia_home"),
     url(r'^about/$', 'oppia.views.about_view', name="oppia_about"),
     url(r'^server/$', 'oppia.views.server_view', name="oppia_server"),
+    url(r'^about/$', 'oppia.views.about_view', name="oppia_about"),
     
     url(r'^teacher/$', 'oppia.views.teacher_home_view', name="oppia_teacher_home"),
     
@@ -65,7 +66,6 @@ urlpatterns = patterns('',
     url(r'^cohort/(?P<cohort_id>\d+)/leaderboard/$', 'oppia.views.cohort_leaderboard_view', name="oppia_cohort_leaderboard"),
     
     url(r'^profile/', include('oppia.profile.urls')),
-    url(r'^terms/$', 'oppia.views.terms_view', name="oppia_terms"),
     
     url(r'^api/', include(v1_api.urls)),
     url(r'^api/publish/$', 'oppia.api.publish.publish_view', name="oppia_publish"),
