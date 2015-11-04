@@ -21,16 +21,14 @@ def courses_completed(hours):
         print "Badge not found: coursecompleted"
         return
     
-    print hours
     # create batch of course with all the digests for each course
     courses = Course.objects.filter(is_draft=False, is_archived=False)
     for c in courses:
-        digests = Activity.objects.filter(section__course=c).values('digest').distinct()
+        digests = Activity.objects.filter(section__course=c, type=Activity.QUIZ).exclude(section__order=0).values('digest').distinct()
             
         # get all the users who've added tracker for this course in last 'hours'
         if hours == 0:
             users = User.objects.filter(tracker__course=c).distinct()
-            
         else:
             since = timezone.now() - datetime.timedelta(hours=int(hours))
             users = User.objects.filter(tracker__course=c, tracker__submitted_date__gte=since).distinct()

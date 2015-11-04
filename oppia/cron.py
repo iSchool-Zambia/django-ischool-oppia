@@ -19,7 +19,6 @@ def run(hours):
             if os.path.isfile(f):
                 os.remove(f)
     
-
     courses_completed(hours)           
     print 'cron completed'
 
