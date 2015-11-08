@@ -26,52 +26,44 @@
 
 {% crispy form %}
 
-{% if results_title %}
-<h3>{{ results_title }}</h3>
-
-<div class="table-responsive">
-	<table class="table table-striped-expandable">
-		<thead>
-		 <thead>
-               <tr>
-                 <th>{% trans 'Course' %}</th>
-                 <th>{% trans 'Passed (all)' %}</th>
-                 <th>{% trans 'Passed (with over 80%)' %}</th>
-                 <th>{% trans 'Failed' %}</th>
-                 <th>{% trans 'Total' %}</th>
-               </tr>
-             </thead>
-             <tbody>
-		              
-{% for result in results %}
-	<tr>
-		<td>{{ result.course.title|title_lang:LANGUAGE_CODE }}</td>
-		<td>{{ result.passed|length }}</td>
-		<td></td>
-		<td></td>
-		<td></td>
-	</tr>
-
-
-	<h4></h4>
+{% if province %}
+	<h3>{{ province.name }} results for {{ start_date|date:"Y-m-d" }} to {{ end_date|date:"Y-m-d" }}</h3>
 	
-		{% if result.passed %}
-			
-						{% for user in result.passed %}
-							<tr><td>{{ user.first_name }} {{ user.last_name }} ({{ user.username }})</td></tr>
-						{% endfor %}
-						</tbody>
-					</table>
-				</div>
-		{% else %}
-			{% trans 'No students have passed during this period' %}
-		{% endif %}
-			
-	Failed: {% for user in result.failed %}
-		{{ user.username }}
+	{% for result in results %}
+		<h3>{% trans 'Course' %}: {{ result.course.title|title_lang:LANGUAGE_CODE }}</h3>
+		<div class="table-responsive">
+			<table class="table table-striped-expandable">
+				<thead>
+				 <thead>
+	               <tr>
+	                 <th>{% trans 'District' %}</th>
+	                 <th>{% trans 'Facility' %}</th>
+	                 <th>{% trans 'Passed' %}</th>
+	                 <th>{% trans 'Passed (with over 80%)' %}</th>
+	                 <th>{% trans 'Failed' %}</th>
+	                 <th>{% trans 'Total' %}</th>
+	               </tr>
+	             </thead>
+	             <tbody>
+	             	{% for district in result.districts %}
+	             		<tr>
+	             			<td colspan='6'>{{ district.district.name }}</td>
+	             		</tr>
+	             		{% for facility in district.facilities %}
+		             		<tr>
+		             			<td>&nbsp;</td>
+		             			<td>{{ facility.facility.name }}</td>
+		             			<td>{{ facility.passed|length }}</td>
+		             			<td></td>
+		             			<td>{{ facility.failed|length }}</td>
+		             			<td>{{ facility.total }}</td>
+		             		</tr>
+	             		{% endfor %}
+	             	{% endfor %}
+	             </tbody>
+		   </table>
+		</div>
+			              
 	{% endfor %}
-{% endfor %}
 {% endif %}
-
-
 {% endblock %}

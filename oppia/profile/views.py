@@ -152,13 +152,14 @@ def edit(request, user_id=0):
             view_user.last_name = last_name
             view_user.save()
             
+            location = Facility.objects.get(pk=form.cleaned_data.get("location"))
             try:
                 user_profile = UserProfile.objects.get(user=view_user)
                 user_profile.job_title = form.cleaned_data.get("job_title")
                 user_profile.organisation = form.cleaned_data.get("organisation")
                 user_profile.profession = form.cleaned_data.get("profession")
                 user_profile.years_in_service = form.cleaned_data.get("years_in_service")
-                user_profile.location = form.cleaned_data.get("location")
+                user_profile.location = location
                 user_profile.save()
             except UserProfile.DoesNotExist:
                 user_profile = UserProfile()
@@ -167,7 +168,7 @@ def edit(request, user_id=0):
                 user_profile.organisation = form.cleaned_data.get("organisation")
                 user_profile.profession = form.cleaned_data.get("profession")
                 user_profile.years_in_service = form.cleaned_data.get("years_in_service")
-                user_profile.location = form.cleaned_data.get("location")
+                user_profile.location = location
                 user_profile.save()
             messages.success(request, _(u"Profile updated"))
             

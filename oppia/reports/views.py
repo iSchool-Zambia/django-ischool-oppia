@@ -24,7 +24,7 @@ def menu_reports(request):
 
 
 def incomplete_profiles_view(request):
-    users = User.objects.filter(userprofile__facility=None,is_staff=False)
+    users = User.objects.filter(userprofile__location=None,is_staff=False)
     return render_to_response('oppia/reports/incomplete-profiles.html',
                               {'users': users,
                                }, 
@@ -40,7 +40,7 @@ def pass_rate_view(request):
     
     start_date = timezone.now() - datetime.timedelta(days=31)
     end_date = timezone.now()
-    results = []
+    
     if request.method == 'POST':
         form = ProvinceDateDiffForm(request.POST)
         form.fields['provinces'].choices = [(p.id,p.name) for p in Province.objects.all()]
@@ -51,57 +51,77 @@ def pass_rate_view(request):
             end_date = datetime.datetime.strptime(end_date,"%Y-%m-%d")      
             province = Province.objects.get(pk=form.cleaned_data.get("provinces"))
             
-            results_title = ("Pass/Fail for province '%s' between '%s' and '%s' " % (province.name, start_date, end_date))
-            
             courses = Course.objects.filter(is_draft=False,is_archived=False)
+            districts = District.objects.filter(province=province).order_by('name')
+            results = []
             
             for course in courses:
                 result = {}
                 result['course'] = course
+                result['districts'] = []
                 
-                # get the quizzes for the course
-                quiz_acts = Activity.objects.filter(type=Activity.QUIZ,section__course=course).exclude(section__order=0).values_list('digest', flat=True)
-                trackers = Tracker.objects.filter(submitted_date__gte=start_date, submitted_date__lte=end_date,digest__in=quiz_acts)
-            
-                # get the total no people who passed/failed the quiz during this time
-                users_passed = []
-                users_failed = []
-                for t in trackers:
-                    # check it's not more than the users 3rd attempt
-                    no_previous_attempts = Tracker.objects.filter(submitted_date__lt=t.submitted_date,user=t.user,digest=t.digest).count()
-                    if no_previous_attempts > 2:
-                        continue
+                for district in districts:
+                    district_results = {}
+                    district_results['district'] = district
+                    district_results['facilities'] = []
                     
-                    if t.completed == True:
-                        users_passed.append(t.user)
-                    else:
-                        users_failed.append(t.user)
-    
-                users_failed = list(set(users_failed) - set(users_passed))
+                    facilities = Facility.objects.filter(district=district).order_by('name')
+                    
+                    for facility in facilities:
+                        facility_results = {}
+                        facility_results['facility'] = facility
                         
-                result['passed'] = users_passed
-                result['failed'] = users_failed    
+                        # get the quizzes for the course
+                        quiz_acts = Activity.objects.filter(type=Activity.QUIZ,section__course=course).exclude(section__order=0).values_list('digest', flat=True)
+                        trackers = Tracker.objects.filter(submitted_date__gte=start_date, submitted_date__lte=end_date,digest__in=quiz_acts, user__userprofile__location=facility)
+                    
+                        # get the total no people who passed/failed the quiz during this time
+                        users_passed = []
+                        users_failed = []
+                        for t in trackers:
+                            # check it's not more than the users 3rd attempt
+                            no_previous_attempts = Tracker.objects.filter(submitted_date__lt=t.submitted_date,user=t.user,digest=t.digest).count()
+                            if no_previous_attempts > 2:
+                                continue
+                            
+                            if t.completed == True:
+                                users_passed.append(t.user)
+                            else:
+                                users_failed.append(t.user)
+            
+                        users_failed = list(set(users_failed) - set(users_passed))
+                                
+                        facility_results['passed'] = users_passed
+                        facility_results['passed80'] = users_passed
+                        facility_results['failed'] = users_failed  
+                        facility_results['total'] = len(users_failed) + len(users_passed)
                  
+                        district_results['facilities'].append(facility_results)
+                    result['districts'].append(district_results)
                 results.append(result)   
-    
+                
+            return render_to_response('oppia/reports/pass-rate.html',
+                                  {'results': results,
+                                   'form': form,
+                                   'start_date': start_date,
+                                   'end_date': end_date,
+                                   'province': province,
+                                   }, 
+                                  context_instance=RequestContext(request))
+        
     else:
         data = {}
         data['start_date'] = start_date
         data['end_date'] = end_date
         form = ProvinceDateDiffForm(initial=data)
         form.fields['provinces'].choices = [(p.id,p.name) for p in Province.objects.all()]
-        results_title = None
         
-    
-    
-    return render_to_response('oppia/reports/pass-rate.html',
-                              {'results': results,
-                               'form': form,
-                               'start_date': start_date,
-                               'end_date': end_date,
-                               'results_title': results_title,
-                               }, 
-                              context_instance=RequestContext(request))
+        return render_to_response('oppia/reports/pass-rate.html',
+                                  {'form': form,
+                                   'start_date': start_date,
+                                   'end_date': end_date,
+                                   }, 
+                                  context_instance=RequestContext(request))
      
      
 '''
