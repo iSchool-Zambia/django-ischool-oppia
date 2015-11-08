@@ -24,6 +24,7 @@ from oppia.forms import DateRangeForm, DateRangeIntervalForm
 from oppia.models import Points, Award, AwardCourse, Course, UserProfile, Tracker, Activity
 from oppia.permissions import get_user, get_user_courses, can_view_course, can_edit_user
 from oppia.profile.forms import LoginForm, RegisterForm, ResetForm, ProfileForm, UploadProfileForm
+from oppia.profile.models import Province, District, Facility
 from oppia.quiz.models import Quiz, QuizAttempt
 
 from tastypie.models import ApiKey
@@ -64,6 +65,7 @@ def register(request):
     
     if request.method == 'POST': # if form submitted...
         form = RegisterForm(request.POST)
+        form.fields['location'].choices = [(p.id,p.name) for p in Facility.objects.all()]
         if form.is_valid(): # All validation rules pass
             # Create new user
             username = form.cleaned_data.get("username")
@@ -88,6 +90,7 @@ def register(request):
             return HttpResponseRedirect('thanks/') # Redirect after POST
     else:
         form = RegisterForm(initial={'next':request.GET.get('next'),})
+        form.fields['location'].choices = [(p.id,p.name) for p in Facility.objects.all()]
 
     return render_to_response('oppia/form.html', 
                               {'form': form, 
@@ -97,6 +100,7 @@ def register(request):
 def reset(request):
     if request.method == 'POST': # if form submitted...
         form = ResetForm(request.POST)
+        
         if form.is_valid():
             username = form.cleaned_data.get("username")
             try:
@@ -137,6 +141,7 @@ def edit(request, user_id=0):
     key = ApiKey.objects.get(user = view_user)
     if request.method == 'POST':
         form = ProfileForm(request.POST)
+        form.fields['location'].choices = [(p.id,p.name) for p in Facility.objects.all()]
         if form.is_valid():
             # update basic data
             email = form.cleaned_data.get("email")
@@ -153,9 +158,7 @@ def edit(request, user_id=0):
                 user_profile.organisation = form.cleaned_data.get("organisation")
                 user_profile.profession = form.cleaned_data.get("profession")
                 user_profile.years_in_service = form.cleaned_data.get("years_in_service")
-                user_profile.province = form.cleaned_data.get("province")
-                user_profile.district = form.cleaned_data.get("district")
-                user_profile.facility = form.cleaned_data.get("facility")
+                user_profile.location = form.cleaned_data.get("location")
                 user_profile.save()
             except UserProfile.DoesNotExist:
                 user_profile = UserProfile()
@@ -164,9 +167,7 @@ def edit(request, user_id=0):
                 user_profile.organisation = form.cleaned_data.get("organisation")
                 user_profile.profession = form.cleaned_data.get("profession")
                 user_profile.years_in_service = form.cleaned_data.get("years_in_service")
-                user_profile.province = form.cleaned_data.get("province")
-                user_profile.district = form.cleaned_data.get("district")
-                user_profile.facility = form.cleaned_data.get("facility")
+                user_profile.location = form.cleaned_data.get("location")
                 user_profile.save()
             messages.success(request, _(u"Profile updated"))
             
@@ -190,9 +191,8 @@ def edit(request, user_id=0):
                                     'organisation': user_profile.organisation,
                                     'profession': user_profile.profession,
                                     'years_in_service': user_profile.years_in_service,
-                                    'province': user_profile.province,
-                                    'district': user_profile.district,
-                                    'facility': user_profile.facility,})
+                                    'location': user_profile.location,})
+        form.fields['location'].choices = [(p.id,p.name) for p in Facility.objects.all()]
         
     return render_to_response( 
                   'oppia/profile/profile.html', 

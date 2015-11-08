@@ -82,9 +82,7 @@ class RegisterForm(forms.Form):
     organisation = forms.CharField(max_length=100,required=True)
     profession = forms.CharField(max_length=100,required=True)
     years_in_service = forms.CharField(max_length=100,required=True)
-    province = forms.CharField(max_length=100,required=True)
-    district = forms.CharField(max_length=100,required=True)
-    facility = forms.CharField(max_length=100,required=True)
+    location = forms.ChoiceField(widget=forms.Select)
     
     def __init__(self, *args, **kwargs):
         super(RegisterForm, self).__init__(*args, **kwargs)
@@ -104,9 +102,7 @@ class RegisterForm(forms.Form):
                                     'organisation',
                                     'profession',
                                     'years_in_service',
-                                    'province',
-                                    'district',
-                                    'facility',
+                                    'location',
                                 Div(
                                    Submit('submit', _(u'Register'), css_class='btn btn-default'),
                                    css_class='col-lg-offset-2 col-lg-4',
@@ -185,9 +181,7 @@ class RegisterFormAPI(forms.Form):
                                     'organisation',
                                     'profession',
                                     'years_in_service',
-                                    'province',
-                                    'district',
-                                    'facility',
+                                    'location',
                                 Div(
                                    Submit('submit', _(u'Register'), css_class='btn btn-default'),
                                    css_class='col-lg-offset-2 col-lg-4',
@@ -277,9 +271,7 @@ class ProfileForm(forms.Form):
     organisation = forms.CharField(max_length=100,required=True)
     profession = forms.CharField(max_length=100,required=True)
     years_in_service = forms.CharField(max_length=100,required=True)
-    province = forms.CharField(max_length=100,required=True)
-    district = forms.CharField(max_length=100,required=True)
-    facility = forms.CharField(max_length=100,required=True)
+    location = forms.ChoiceField(widget=forms.Select)
     
     def __init__(self, *args, **kwargs):
         super(ProfileForm, self).__init__(*args, **kwargs)
@@ -320,9 +312,7 @@ class ProfileForm(forms.Form):
                     'organisation',
                     'profession',
                     'years_in_service',
-                    'province',
-                    'district',
-                    'facility',
+                    'location',
                     Div(
                         HTML("""<h3>"""+_(u'Change password') + """</h3>"""),
                         ),
