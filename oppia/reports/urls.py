@@ -4,6 +4,7 @@ from django.views.generic import TemplateView
 
 urlpatterns = patterns('',
            
-    url(r'^incomplete-profiles/$', 'oppia.reports.views.incomplete_profiles_view', name="oppia_report_incomplete_profiles"),            
+    url(r'^incomplete-profiles/$', 'oppia.reports.views.incomplete_profiles_view', name="oppia_report_incomplete_profiles"),  
+    url(r'^pass-rate/$', 'oppia.reports.views.pass_rate_view', name="oppia_report_pass_rate"),           
                        
     )

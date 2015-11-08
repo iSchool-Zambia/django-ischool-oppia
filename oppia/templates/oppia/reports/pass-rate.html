@@ -1,0 +1,77 @@
+{% extends "base.html" %} 
+{% load i18n %} 
+{% load display_functions %} 
+{% load crispy_forms_tags %}
+
+
+{% block extra_head_title %}
+	{% trans 'Pass/Failure Rates' %}
+{% endblock extra_head_title %}
+
+{% block extra_scripts %}
+	<script type="text/javascript">
+	{% include "oppia/includes/init-date-picker-js.html" %}
+	</script>
+{% endblock extra_scripts %}
+
+{% if user.is_authenticated %}
+	{% block extra_body %}
+		onload="setUpDatePicker();"
+	{% endblock extra_body %}
+{% endif %} 
+
+{% block content %}
+
+<h2>{% trans 'Pass/Failure Rates' %}</h2>
+
+{% crispy form %}
+
+{% if results_title %}
+<h3>{{ results_title }}</h3>
+
+<div class="table-responsive">
+	<table class="table table-striped-expandable">
+		<thead>
+		 <thead>
+               <tr>
+                 <th>{% trans 'Course' %}</th>
+                 <th>{% trans 'Passed (all)' %}</th>
+                 <th>{% trans 'Passed (with over 80%)' %}</th>
+                 <th>{% trans 'Failed' %}</th>
+                 <th>{% trans 'Total' %}</th>
+               </tr>
+             </thead>
+             <tbody>
+		              
+{% for result in results %}
+	<tr>
+		<td>{{ result.course.title|title_lang:LANGUAGE_CODE }}</td>
+		<td>{{ result.passed|length }}</td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+
+
+	<h4></h4>
+	
+		{% if result.passed %}
+			
+						{% for user in result.passed %}
+							<tr><td>{{ user.first_name }} {{ user.last_name }} ({{ user.username }})</td></tr>
+						{% endfor %}
+						</tbody>
+					</table>
+				</div>
+		{% else %}
+			{% trans 'No students have passed during this period' %}
+		{% endif %}
+			
+	Failed: {% for user in result.failed %}
+		{{ user.username }}
+	{% endfor %}
+{% endfor %}
+{% endif %}
+
+
+{% endblock %}
