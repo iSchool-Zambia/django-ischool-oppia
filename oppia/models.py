@@ -9,6 +9,7 @@ from django.db.models import Max, Sum, Q, F
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
 
+from oppia.profile.models import Facility
 from oppia.quiz.models import Quiz, QuizAttempt
 
 from tastypie.models import create_api_key
@@ -27,9 +28,7 @@ class UserProfile (models.Model):
     # ischool specific starts
     profession = models.TextField(blank=True, null=True, default=None)
     years_in_service = models.TextField(blank=True, null=True, default=None)
-    province = models.TextField(blank=True, null=True, default=None)
-    district = models.TextField(blank=True, null=True, default=None)
-    facility = models.TextField(blank=True, null=True, default=None)
+    location = models.ForeignKey(Facility, null=True, blank=True, default=None) 
     # ischool specific ends
 
     def get_can_upload(self):
