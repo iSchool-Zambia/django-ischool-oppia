@@ -19,7 +19,9 @@ def menu_reports(request):
             { 'name': _(u'Incomplete Profiles'),
               'url': reverse('oppia_report_incomplete_profiles')},
             { 'name': _(u'Pass/Failure Rates'),
-              'url': reverse('oppia_report_pass_rate')}
+              'url': reverse('oppia_report_pass_rate')},
+            #{ 'name': _(u'Undertook Courses'),
+            #  'url': reverse('oppia_report_undertook_course')}
             ]
 
 
@@ -108,7 +110,12 @@ def pass_rate_view(request):
                                    'province': province,
                                    }, 
                                   context_instance=RequestContext(request))
-        
+        return render_to_response('oppia/reports/pass-rate.html',
+                                  {'form': form,
+                                   'start_date': start_date,
+                                   'end_date': end_date,
+                                   }, 
+                                  context_instance=RequestContext(request))
     else:
         data = {}
         data['start_date'] = start_date
@@ -126,14 +133,55 @@ def pass_rate_view(request):
      
 '''
 3. For any specified period, how many providers undertook the eLearning course?  How many failed to complete the course?
-'''
-    
-    
-'''
 4. How many providers passed the eLearning course with a score of 80% or higher?
-'''
-
-'''
 5. How many Providers attempted the Post Quiz once, twice or three times before passing the
 course?
 '''
+        
+def undertook_course_view(request):
+       
+    start_date = timezone.now() - datetime.timedelta(days=31)
+    end_date = timezone.now()
+    
+    if request.method == 'POST':
+        form = DateDiffForm(request.POST)
+        if form.is_valid():
+            start_date = form.cleaned_data.get("start_date")  
+            start_date = datetime.datetime.strptime(start_date,"%Y-%m-%d")
+            end_date = form.cleaned_data.get("end_date")
+            end_date = datetime.datetime.strptime(end_date,"%Y-%m-%d")      
+            
+            courses = Course.objects.filter(is_draft=False,is_archived=False)
+            results = []
+            
+            for course in courses:
+               pass
+                
+            return render_to_response('oppia/reports/undertook-course.html',
+                                  {'results': results,
+                                   'form': form,
+                                   'start_date': start_date,
+                                   'end_date': end_date,
+                                   }, 
+                                  context_instance=RequestContext(request))
+        return render_to_response('oppia/reports/undertook-course.html',
+                                  {'form': form,
+                                   'start_date': start_date,
+                                   'end_date': end_date,
+                                   }, 
+                                  context_instance=RequestContext(request))
+    else:
+        data = {}
+        data['start_date'] = start_date
+        data['end_date'] = end_date
+        form = DateDiffForm(initial=data)
+        
+        return render_to_response('oppia/reports/undertook-course.html',
+                                  {'form': form,
+                                   'start_date': start_date,
+                                   'end_date': end_date,
+                                   }, 
+                                  context_instance=RequestContext(request)) 
+    
+    
+    

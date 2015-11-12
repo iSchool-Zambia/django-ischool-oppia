@@ -60,18 +60,21 @@ class ProvinceDateDiffForm(forms.Form):
 
 
 class DateDiffForm(forms.Form):
-    start_date = forms.DateField(
+    start_date = forms.CharField(
         required=True,
-        error_messages={'required': _('Please enter a valid date'),
-                         'invalid':_('Please enter a valid date')},
-        )
+        error_messages={'required': _('Please enter a start date'),
+                        'invalid':_('Please enter a valid date')})
+    end_date = forms.CharField(
+        required=True,
+        error_messages={'required': _('Please enter an end date'),
+                        'invalid':_('Please enter a valid date')}) 
     
     def __init__(self, *args, **kwargs):
         super(DateDiffForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_class = 'form-horizontal'
-        self.helper.label_class = 'col-lg-2'
-        self.helper.field_class = 'col-lg-3'
         self.helper.layout = Layout(
-                FieldWithButtons('start_date',Submit('submit', _(u'Go'), css_class='btn btn-default')),
+                Row(
+                    Div('start_date',css_class='date-picker-row-fluid'),
+                    FieldWithButtons('end_date',Submit('submit', _(u'Go'), css_class='btn btn-default'),css_class='date-picker-row-fluid'),
+                )
             ) 

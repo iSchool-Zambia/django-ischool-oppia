@@ -1,0 +1,69 @@
+{% extends "base.html" %} 
+{% load i18n %} 
+{% load display_functions %} 
+{% load crispy_forms_tags %}
+
+
+{% block extra_head_title %}
+	{% trans 'Undertook Courses' %}
+{% endblock extra_head_title %}
+
+{% block extra_scripts %}
+	<script type="text/javascript">
+	{% include "oppia/includes/init-date-picker-js.html" %}
+	</script>
+{% endblock extra_scripts %}
+
+{% if user.is_authenticated %}
+	{% block extra_body %}
+		onload="setUpDatePicker();"
+	{% endblock extra_body %}
+{% endif %} 
+
+{% block content %}
+
+<h2>{% trans 'Undertook Courses' %}</h2>
+
+{% crispy form %}
+
+{% if province %}
+	<h3>{{ province.name }} results for {{ start_date|date:"Y-m-d" }} to {{ end_date|date:"Y-m-d" }}</h3>
+	
+	{% for result in results %}
+		<h3>{% trans 'Course' %}: {{ result.course.title|title_lang:LANGUAGE_CODE }}</h3>
+		<div class="table-responsive">
+			<table class="table table-striped">
+				<thead>
+				 <thead>
+	               <tr>
+	                 <th>{% trans 'District' %}</th>
+	                 <th>{% trans 'Facility' %}</th>
+	                 <th>{% trans 'Passed' %}</th>
+	                 <th>{% trans 'Passed (with over 80%)' %}</th>
+	                 <th>{% trans 'Failed' %}</th>
+	                 <th>{% trans 'Total' %}</th>
+	               </tr>
+	             </thead>
+	             <tbody>
+	             	{% for district in result.districts %}
+	             		<tr>
+	             			<td colspan='6'>{{ district.district.name }}</td>
+	             		</tr>
+	             		{% for facility in district.facilities %}
+		             		<tr>
+		             			<td>&nbsp;</td>
+		             			<td>{{ facility.facility.name }}</td>
+		             			<td>{{ facility.passed|length }}</td>
+		             			<td></td>
+		             			<td>{{ facility.failed|length }}</td>
+		             			<td>{{ facility.total }}</td>
+		             		</tr>
+	             		{% endfor %}
+	             	{% endfor %}
+	             </tbody>
+		   </table>
+		</div>
+			              
+	{% endfor %}
+{% endif %}
+{% endblock %}
