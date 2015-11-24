@@ -349,7 +349,7 @@ def upload_view(request):
                     for rf in required_fields:
                         if rf not in row or row[rf].strip() == '':
                             result = {}
-                            result['username'] = row['username']
+                            result['username'] = row['username'].replace('/','_')
                             result['created'] = False
                             result['message'] = _(u'No %s set' % rf)
                             results.append(result)
@@ -359,7 +359,7 @@ def upload_view(request):
                         continue
                     
                     user = User()
-                    user.username = row['username']
+                    user.username = row['username'].replace('/','_')
                     user.first_name = row['firstname']
                     user.last_name = row['lastname']
                     user.email = row['email']
@@ -378,7 +378,7 @@ def upload_view(request):
                             setattr(up, col_name, row[col_name])
                         up.save()
                         result = {}
-                        result['username'] = row['username']
+                        result['username'] = row['username'].replace('/','_')
                         result['created'] = True
                         if auto_password:
                             result['message'] = _(u'User created with password: %s' % password)
@@ -387,7 +387,7 @@ def upload_view(request):
                         results.append(result)
                     except IntegrityError as ie:
                         result = {}
-                        result['username'] = row['username']
+                        result['username'] = row['username'].replace('/','_')
                         result['created'] = False
                         result['message'] = _(u'User already exists')
                         results.append(result)
