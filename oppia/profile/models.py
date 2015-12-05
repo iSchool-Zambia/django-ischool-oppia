@@ -26,6 +26,8 @@ class District (models.Model):
 class Facility (models.Model):
     district = models.ForeignKey(District)
     name = models.CharField(max_length=200, blank=False, null=False)
+    code = models.CharField(max_length=50, blank=True, null=False, default="")
+    active = models.BooleanField(blank=False, null=False, default=True)
     
     class Meta:
         verbose_name = _('Facility')
