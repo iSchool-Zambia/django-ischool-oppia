@@ -28,6 +28,7 @@ class Facility (models.Model):
     name = models.CharField(max_length=200, blank=False, null=False)
     code = models.CharField(max_length=50, blank=True, null=False, default="")
     active = models.BooleanField(blank=False, null=False, default=True)
+    type = models.CharField(max_length=200, blank=True, null=False, default="")
     
     class Meta:
         verbose_name = _('Facility')
