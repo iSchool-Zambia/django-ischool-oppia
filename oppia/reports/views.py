@@ -16,7 +16,7 @@ def menu_reports(request):
     # add in here any reports that need to appear in the menu
     #return [{'name': 'test', 'url':'/reports/1/'},{'name': 'test2', 'url':'/reports/2/'}]
     return [
-            { 'name': _(u'Incomplete Profiles'),
+            { 'name': _(u'Unknown/Anonymous Users'),
               'url': reverse('oppia_report_incomplete_profiles')},
             { 'name': _(u'Pass/Failure Rates'),
               'url': reverse('oppia_report_pass_rate')},
