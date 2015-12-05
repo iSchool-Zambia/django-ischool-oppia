@@ -39,7 +39,6 @@
 	                 <th>{% trans 'District' %}</th>
 	                 <th>{% trans 'Facility' %}</th>
 	                 <th>{% trans 'Passed' %}</th>
-	                 <th>{% trans 'Passed (with over 80%)' %}</th>
 	                 <th>{% trans 'Failed' %}</th>
 	                 <th>{% trans 'Total' %}</th>
 	               </tr>
@@ -54,7 +53,6 @@
 		             			<td>&nbsp;</td>
 		             			<td>{{ facility.facility.name }}</td>
 		             			<td>{{ facility.passed|length }}</td>
-		             			<td></td>
 		             			<td>{{ facility.failed|length }}</td>
 		             			<td>{{ facility.total }}</td>
 		             		</tr>

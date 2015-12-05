@@ -94,7 +94,6 @@ def pass_rate_view(request):
                         users_failed = list(set(users_failed) - set(users_passed))
                                 
                         facility_results['passed'] = users_passed
-                        facility_results['passed80'] = users_passed
                         facility_results['failed'] = users_failed  
                         facility_results['total'] = len(users_failed) + len(users_passed)
                  
