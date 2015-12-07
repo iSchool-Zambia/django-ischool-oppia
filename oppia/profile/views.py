@@ -65,7 +65,7 @@ def register(request):
     
     if request.method == 'POST': # if form submitted...
         form = RegisterForm(request.POST)
-        form.fields['location'].choices = [(p.id,p.name) for p in Facility.objects.all()]
+        form.fields['location'].choices = get_location_choices()
         if form.is_valid(): # All validation rules pass
             # Create new user
             username = form.cleaned_data.get("username")
@@ -77,10 +77,19 @@ def register(request):
             user.first_name = first_name
             user.last_name = last_name
             user.save()
+            
+            try:
+                facility = Facility.objects.get(pk=form.cleaned_data.get("location"))
+            except Facility.DoesNotExist:
+                facility = None
+            
             user_profile = UserProfile()
             user_profile.user = user
             user_profile.job_title = form.cleaned_data.get("job_title")
             user_profile.organisation = form.cleaned_data.get("organisation")
+            user_profile.profession = form.cleaned_data.get("profession")
+            user_profile.years_in_service = form.cleaned_data.get("years_in_service")
+            user_profile.location = facility
             user_profile.save()
             u = authenticate(username=username, password=password)
             if u is not None:
@@ -90,7 +99,7 @@ def register(request):
             return HttpResponseRedirect('thanks/') # Redirect after POST
     else:
         form = RegisterForm(initial={'next':request.GET.get('next'),})
-        form.fields['location'].choices = [(p.id,p.name) for p in Facility.objects.all()]
+        form.fields['location'].choices = get_location_choices()
 
     return render_to_response('oppia/form.html', 
                               {'form': form, 
@@ -141,7 +150,7 @@ def edit(request, user_id=0):
     key = ApiKey.objects.get(user = view_user)
     if request.method == 'POST':
         form = ProfileForm(request.POST)
-        form.fields['location'].choices = [(p.id,p.name) for p in Facility.objects.all()]
+        form.fields['location'].choices = get_location_choices()
         if form.is_valid():
             # update basic data
             email = form.cleaned_data.get("email")
@@ -152,14 +161,18 @@ def edit(request, user_id=0):
             view_user.last_name = last_name
             view_user.save()
             
-            location = Facility.objects.get(pk=form.cleaned_data.get("location"))
+            try:
+                facility = Facility.objects.get(pk=form.cleaned_data.get("location"))
+            except Facility.DoesNotExist:
+                facility = None
+            
             try:
                 user_profile = UserProfile.objects.get(user=view_user)
                 user_profile.job_title = form.cleaned_data.get("job_title")
                 user_profile.organisation = form.cleaned_data.get("organisation")
                 user_profile.profession = form.cleaned_data.get("profession")
                 user_profile.years_in_service = form.cleaned_data.get("years_in_service")
-                user_profile.location = location
+                user_profile.location = facility
                 user_profile.save()
             except UserProfile.DoesNotExist:
                 user_profile = UserProfile()
@@ -168,7 +181,7 @@ def edit(request, user_id=0):
                 user_profile.organisation = form.cleaned_data.get("organisation")
                 user_profile.profession = form.cleaned_data.get("profession")
                 user_profile.years_in_service = form.cleaned_data.get("years_in_service")
-                user_profile.location = location
+                user_profile.location = facility
                 user_profile.save()
             messages.success(request, _(u"Profile updated"))
             
@@ -183,6 +196,13 @@ def edit(request, user_id=0):
             user_profile = UserProfile.objects.get(user=view_user)
         except UserProfile.DoesNotExist:
             user_profile = UserProfile()
+            
+        if user_profile.location is None:
+            location = 0
+        else:
+            location = user_profile.location.id
+            
+        print location
         form = ProfileForm(initial={'username':view_user.username,
                                     'email':view_user.email,
                                     'first_name':view_user.first_name,
@@ -192,8 +212,8 @@ def edit(request, user_id=0):
                                     'organisation': user_profile.organisation,
                                     'profession': user_profile.profession,
                                     'years_in_service': user_profile.years_in_service,
-                                    'location': user_profile.location,})
-        form.fields['location'].choices = [(p.id,p.name) for p in Facility.objects.all()]
+                                    'location': location,})
+        form.fields['location'].choices = get_location_choices()
         
     return render_to_response( 
                   'oppia/profile/profile.html', 
@@ -340,7 +360,7 @@ def upload_view(request):
         if form.is_valid():
             request.FILES['upload_file'].open("rb")
             csv_file = csv.DictReader(request.FILES['upload_file'].file)
-            required_fields = ['username','firstname','lastname','email']
+            required_fields = ['username','firstname','lastname','email','facilitycode']
             results = []
             try:
                 for row in csv_file:
@@ -370,28 +390,45 @@ def upload_view(request):
                         password = User.objects.make_random_password()
                         user.set_password(password)
                         auto_password = True
+                    
+                    # save new user - if exists already then just update    
                     try:
                         user.save()
-                        up = UserProfile()
-                        up.user = user
-                        for col_name in row:
-                            setattr(up, col_name, row[col_name])
-                        up.save()
-                        result = {}
-                        result['username'] = row['username'].replace('/','_')
-                        result['created'] = True
-                        if auto_password:
-                            result['message'] = _(u'User created with password: %s' % password)
-                        else:
-                            result['message'] = _(u'User created')
-                        results.append(result)
                     except IntegrityError as ie:
-                        result = {}
-                        result['username'] = row['username'].replace('/','_')
-                        result['created'] = False
-                        result['message'] = _(u'User already exists')
-                        results.append(result)
-                        continue
+                        user = User.objects.get(username=row['username'].replace('/','_'))
+                        user.first_name = row['firstname']
+                        user.last_name = row['lastname']
+                        user.email = row['email']
+                        user.save()
+                        auto_password = False
+                        
+                    up, up_created = UserProfile.objects.get_or_create(user=user)  
+                        
+                    for col_name in row:
+                        if col_name == 'facilitycode':
+                            try:
+                                facility = Facility.objects.get(code = row[col_name])
+                                up.location = facility
+                                facility.active = True
+                                facility.save()
+                            except Facility.DoesNotExist:
+                                pass
+                        else:
+                            setattr(up, col_name, row[col_name])
+                    up.save()
+                    
+                    result = {}
+                    result['username'] = row['username'].replace('/','_')
+                    result['created'] = True
+                    if auto_password:
+                        result['message'] = _(u'User created with password: %s' % password)
+                    elif up_created:
+                        result['message'] = _(u'User created')
+                    else:
+                        result['message'] = _(u'User updated')
+                        
+                    results.append(result)
+                    
             except:
                 result = {}
                 result['username'] = None
@@ -407,3 +444,9 @@ def upload_view(request):
                               {'form': form, 
                                'results': results},
                               context_instance=RequestContext(request),)
+    
+def get_location_choices():
+    loc_list = [(long('0'),u'--')]
+    full_locs = [(p.id, p.get_name_full()) for p in Facility.objects.all().order_by('district__province__name', 'district__name', 'name')]
+    loc_list.extend(full_locs)
+    return loc_list

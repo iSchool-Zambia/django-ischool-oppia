@@ -82,7 +82,7 @@ class RegisterForm(forms.Form):
     organisation = forms.CharField(max_length=100,required=True)
     profession = forms.CharField(max_length=100,required=True)
     years_in_service = forms.CharField(max_length=100,required=True)
-    location = forms.ChoiceField(widget=forms.Select)
+    location = forms.ChoiceField(widget=forms.Select, required=False)
     
     def __init__(self, *args, **kwargs):
         super(RegisterForm, self).__init__(*args, **kwargs)
@@ -271,7 +271,7 @@ class ProfileForm(forms.Form):
     organisation = forms.CharField(max_length=100,required=True)
     profession = forms.CharField(max_length=100,required=True)
     years_in_service = forms.CharField(max_length=100,required=True)
-    location = forms.ChoiceField(widget=forms.Select)
+    location = forms.ChoiceField(widget=forms.Select, required=False)
     
     def __init__(self, *args, **kwargs):
         super(ProfileForm, self).__init__(*args, **kwargs)

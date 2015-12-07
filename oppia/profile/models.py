@@ -36,3 +36,6 @@ class Facility (models.Model):
         
     def __unicode__(self):
         return self.name
+    
+    def get_name_full(self):
+        return self.district.province.name + " > " + self.district.name + " > " + self.name
