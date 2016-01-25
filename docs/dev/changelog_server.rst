@@ -1,9 +1,26 @@
 OppiaMobile Server Change Log
 ================================
 
+.. _serverv0.9.3:
+
+v0.9.3 - Not yet released
+--------------------------------
+
+* 287: Separate out the local_settings for dev, staging and live - http://github.com/DigitalCampus/django-oppia/issues/issue/287
+* 290: Add local settings option for the course badges criteria - http://github.com/DigitalCampus/django-oppia/issues/issue/290
+
+.. _serverv0.9.2:
+
+v0.9.2 - Released 10 Dec 2015
+--------------------------------
+
+* 271: Add documentation for the training plans - http://github.com/DigitalCampus/django-oppia/issues/issue/271
+* 277: Add page in the server to allow easier generation of video embed code - http://github.com/DigitalCampus/django-oppia/issues/issue/277
+
+
 .. _serverv0.9.1:
 
-v0.9.1 -  not yet released
+v0.9.1 - Released 23 Oct 2015
 --------------------------------
 
 * 265: Write docs on points and badging - http://github.com/DigitalCampus/django-oppia/issues/issue/265
