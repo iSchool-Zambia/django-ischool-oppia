@@ -18,8 +18,8 @@ def run(hours):
             print f
             if os.path.isfile(f):
                 os.remove(f)
-    
-    courses_completed(hours)           
+         
+    courses_completed(int(hours))           
     print 'cron completed'
 
 
