@@ -8,7 +8,7 @@ Oppia Server
 * 28: Get docs up and running on RTD https://github.com/iSchool-Zambia/django-ischool-oppia/issues/issues/issue/28
 * Merge from core Oppia (25 Jan 2016)
 * 20: Add models for allowing manager reporting levels - https://github.com/iSchool-Zambia/django-ischool-oppia/issues/issues/issue/20
-
+* 14: Update badge awarding to match the quizzes only (and only if less than 3 attempts at each quiz - https://github.com/iSchool-Zambia/django-ischool-oppia/issues/issues/issue/14
 
 Oppia Android App
 ------------------
