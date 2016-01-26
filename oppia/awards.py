@@ -83,22 +83,29 @@ def badge_award_final_quiz(hours):
         print final_quiz_digest
         print c.title
     
+    
+        print "hours: " + str(hours)
         # get all the users who've added tracker for this course in last 'hours'
         if hours == 0:
-            users = User.objects.filter(tracker__course=c).distinct()     
+            users = User.objects.filter(tracker__course=c).distinct()   
+            print "hours2:" + str(hours)  
         else:
             since = timezone.now() - datetime.timedelta(hours=int(hours))
             users = User.objects.filter(tracker__course=c, tracker__submitted_date__gte=since).distinct()
        
+        print "users:"
+        print users
         for u in users:   
+            print u
             if AwardCourse.objects.filter(award__user=u,course=c).count() == 0:
                 continue # if user already has the badge then just move to next user
-                     
-            user_completed = Tracker.objects.filter(user=u, course=c, completed=True, digest=final_quiz_digest).values('digest').distinct().count()
+             
+            print u        
+            user_completed = Tracker.objects.filter(user=u, course=c, completed=True, digest=final_quiz_digest).order_by('submitted_date')[:3].count()
             if user_completed > 0:
                 print c.title
                 print "-----------------------------"
-                print digests.count()
+                print user_completed
                 print u.username + " AWARD BADGE"
                 award = Award()
                 award.badge = badge
