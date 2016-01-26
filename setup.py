@@ -19,7 +19,9 @@ setup(
               'oppia.mobile', 
               'oppia.fixtures',
               'oppia.viz',
-              'oppia.viz.migrations',],
+              'oppia.viz.migrations',
+              'oppia.reports',
+              'oppia.reports.migrations',],
     include_package_data=True,
     license='GNU GPL v3 License',  # example license
     description='Server side component of OppiaMobile learning platform',
