@@ -172,12 +172,24 @@ class Course(models.Model):
     @staticmethod
     def get_no_quizzes_completed(course,user):
         acts = Activity.objects.filter(section__course=course,baseline=False, type=Activity.QUIZ).values_list('digest')
-        return Tracker.objects.filter(course=course,user=user,completed=True,digest__in=acts).values_list('digest').distinct().count()
+        total_completed = 0
+        for act in acts:
+            quiz_completed = False
+            attempts = Tracker.objects.filter(course=course,user=user,digest=act).order_by('submitted_date')[:settings.ISCHOOL_MAX_QUIZ_ATTMEPTS]
+            for a in attempts:
+                if a.completed:
+                    quiz_completed = True
+                    
+            if quiz_completed:
+                total_completed += 1
+        return total_completed
     
     @staticmethod
     def get_activities_completed(course,user):
-        acts = Activity.objects.filter(section__course=course,baseline=False).values_list('digest')
-        return Tracker.objects.filter(course=course,user=user,completed=True,digest__in=acts).values_list('digest').distinct().count()
+        acts = Activity.objects.filter(section__course=course,baseline=False).exclude(type=Activity.QUIZ).values_list('digest')
+        non_quiz_completed = Tracker.objects.filter(course=course,user=user,completed=True,digest__in=acts).values_list('digest').distinct().count()
+        quiz_completed = Course.get_no_quizzes_completed(course, user)
+        return quiz_completed + non_quiz_completed
     
     @staticmethod
     def get_points(course,user):
