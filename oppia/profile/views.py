@@ -301,22 +301,37 @@ def user_course_activity_view(request, user_id, course_id):
     quizzes = []
     for aq in act_quizzes:
         quiz = Quiz.objects.get(quizprops__value=aq.digest, quizprops__name="digest")
-        attempts = QuizAttempt.objects.filter(quiz=quiz, user=view_user)
+        attempts = QuizAttempt.objects.filter(quiz=quiz, user=view_user).order_by('submitted_date')[:settings.ISCHOOL_MAX_QUIZ_ATTMEPTS]
+        
+        max_score = None
+        min_score = None
+        avg_score = None
+        first_score = None
+        latest_score = None
+        
         if attempts.count() > 0:
-            max_score = 100*float(attempts.aggregate(max=Max('score'))['max']) / float(attempts[0].maxscore)
-            min_score = 100*float(attempts.aggregate(min=Min('score'))['min']) / float(attempts[0].maxscore)
-            avg_score = 100*float(attempts.aggregate(avg=Avg('score'))['avg']) / float(attempts[0].maxscore)
-            first_date = attempts.aggregate(date=Min('attempt_date'))['date']
-            recent_date = attempts.aggregate(date=Max('attempt_date'))['date']
-            first_score = 100*float(attempts.filter(attempt_date = first_date)[0].score) / float(attempts[0].maxscore)
-            latest_score = 100*float(attempts.filter(attempt_date = recent_date)[0].score) / float(attempts[0].maxscore)
-        else:
-            max_score = None
-            min_score = None
-            avg_score = None
-            first_score = None
-            latest_score = None
-            
+            max_score = 0
+            min_score = 100
+            avg_score = 0
+            first_score = 0
+            latest_score = 0
+            for counter, a in enumerate(attempts):
+                if 100*float(a.score)/float(a.maxscore) > max_score:
+                    max_score = 100*float(a.score)/float(a.maxscore) 
+           
+                if 100*float(a.score)/float(a.maxscore) < min_score:
+                    min_score = 100*float(a.score)/float(a.maxscore) 
+                
+                if counter == 0:
+                    first_score = 100*float(a.score)/float(a.maxscore)
+                    
+                if counter + 1 == attempts.count():
+                    latest_score = 100*float(a.score)/float(a.maxscore)
+                    
+                avg_score += 100*float(a.score)/float(a.maxscore)
+                
+            avg_score = avg_score/attempts.count()
+
         quiz = {'quiz': aq,
                 'no_attempts': attempts.count(),
                 'max_score': max_score,
