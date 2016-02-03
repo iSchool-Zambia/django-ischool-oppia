@@ -48,7 +48,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'OppiaMobile'
+project = u'iSchool-Zambia OppiaMobile'
 copyright = u'2015, Alex Little, Digital Campus'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -102,7 +102,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -176,7 +176,7 @@ html_last_updated_fmt = '%b %d, %Y'
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'OppiaMobile'
+htmlhelp_basename = 'iSchool-Zambia'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -195,7 +195,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'OppiaMobile.tex', u'OppiaMobile Documentation',
+  ('index', 'iSchool-Zambia.tex', u'iSchool-Zambia OppiaMobile Documentation',
    u'Alex Little, Digital Campus', 'manual'),
 ]
 
@@ -225,7 +225,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'oppiamobile-server', u'OppiaMobile-Server Documentation',
+    ('index', 'iSchool-Zambia-OppiaMobile', u'iSchool-Zambia OppiaMobile Documentation',
      [u'Alex Little, Digital Campus'], 1)
 ]
 
@@ -239,8 +239,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'OppiaMobile-Server', u'OppiaMobile-Server Documentation',
-   u'Alex Little, Digital Campus', 'OppiaMobile-Server', 'One line description of project.',
+  ('index', 'iSchool-Zambia-OppiaMobile', u'iSchool-Zambia OppiaMobile Documentation',
+   u'Alex Little, Digital Campus', 'iSchool-Zambia-OppiaMobile', 'One line description of project.',
    'Miscellaneous'),
 ]
 
