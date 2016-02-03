@@ -171,7 +171,7 @@ class Course(models.Model):
     
     @staticmethod
     def get_no_quizzes_completed(course,user):
-        acts = Activity.objects.filter(section__course=course,baseline=False, type=Activity.QUIZ).values_list('digest')
+        acts = Activity.objects.filter(section__course=course,baseline=False, type=Activity.QUIZ).values_list('digest', flat=True)
         total_completed = 0
         for act in acts:
             quiz_completed = False
