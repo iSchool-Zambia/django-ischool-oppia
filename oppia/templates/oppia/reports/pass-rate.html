@@ -10,13 +10,24 @@
 
 {% block extra_scripts %}
 	<script type="text/javascript">
+	function init(){
+		$('tr[name=district]').each(function(i){
+			$('[name=detail-'+$(this).attr('id')+']').toggle();
+			$(this).click(function() {
+				$('[name=detail-'+$(this).attr('id')+']').toggle();
+			});
+			}
+		);
+		
+	}
+	
 	{% include "oppia/includes/init-date-picker-js.html" %}
 	</script>
 {% endblock extra_scripts %}
 
 {% if user.is_authenticated %}
 	{% block extra_body %}
-		onload="setUpDatePicker();"
+		onload="init();setUpDatePicker();"
 	{% endblock extra_body %}
 {% endif %} 
 
@@ -32,7 +43,7 @@
 	{% for result in results %}
 		<h3>{% trans 'Course' %}: {{ result.course.title|title_lang:LANGUAGE_CODE }}</h3>
 		<div class="table-responsive">
-			<table class="table table-striped">
+			<table class="table">
 				<thead>
 				 <thead>
 	               <tr>
@@ -45,14 +56,14 @@
 	             </thead>
 	             <tbody>
 	             	{% for district in result.districts %}
-	             		<tr>
+	             		<tr id='course-{{ result.course.id }}-district-{{ district.district.id }}' name="district" class="hover" title="{% trans 'Click to expand/collapse' %}">
 	             			<td colspan='2'>{{ district.district.name }}</td>
 	             			<td>{{ district.passed }}</td>
 	             			<td>{{ district.failed }}</td>
 	             			<td>{{ district.total }}</td>
 	             		</tr>
 	             		{% for facility in district.facilities %}
-		             		<tr>
+		             		<tr name="detail-course-{{ result.course.id }}-district-{{ district.district.id }}">
 		             			<td>&nbsp;</td>
 		             			<td>{{ facility.facility.name }}</td>
 		             			<td>{{ facility.passed|length }}</td>
@@ -60,7 +71,7 @@
 		             			<td>{{ facility.total }}</td>
 		             		</tr>
 		             		{% if facility.total > 0 %}
-		             			<tr>
+		             			<tr name="detail-course-{{ result.course.id }}-district-{{ district.district.id }}">
 		             				<td>&nbsp;</td>
 		             				<td>&nbsp;</td>
 		             				<td>

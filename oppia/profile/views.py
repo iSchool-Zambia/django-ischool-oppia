@@ -263,7 +263,6 @@ def user_activity(request, user_id):
                 'no_quizzes_completed': course.get_no_quizzes_completed(course,view_user),
                 'pretest_score': course.get_pre_test_score(course,view_user),
                 'no_activities_completed': course.get_activities_completed(course,view_user),
-                'no_quizzes_completed': course.get_no_quizzes_completed(course,view_user),
                 'no_points': course.get_points(course,view_user),
                 'no_badges': course.get_badges(course,view_user),}
         courses.append(data)
