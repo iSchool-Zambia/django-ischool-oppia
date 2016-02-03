@@ -1,5 +1,6 @@
 # oppia/reports/views.py
 import datetime
+import json
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
@@ -13,6 +14,7 @@ from oppia.models import User, UserProfile, Course, Tracker, Activity
 from oppia.profile.models import Province, District, Facility
 from oppia.reports.forms import ProvinceDateDiffForm, DateDiffForm
 from oppia.reports.permissions import *
+from oppia.reports.signals import dashboard_accessed
 
 def menu_reports(request):
     # add in here any reports that need to appear in the menu
@@ -35,6 +37,8 @@ def incomplete_profiles_view(request):
     if not reporting_access(request.user):
         return HttpResponse('Unauthorized', status=401)
     
+    dashboard_accessed.send(sender=None, request=request, data=None)
+    
     users = User.objects.filter(userprofile__location=None,is_staff=False)
     return render_to_response('oppia/reports/incomplete-profiles.html',
                               {'users': users,
@@ -53,8 +57,11 @@ def pass_rate_view(request):
     end_date = timezone.now()
     
     if request.method == 'POST':
-        form = ProvinceDateDiffForm(request.POST)
+        form = ProvinceDateDiffForm(request.POST)        
         form.fields['provinces'].choices = [(p.id,p.name) for p in reporting_province_access(request.user)]
+        
+        dashboard_accessed.send(sender=None, request=request, data=json.dumps(request.POST))
+        
         if form.is_valid():
             start_date = form.cleaned_data.get("start_date")  
             start_date = datetime.datetime.strptime(start_date,"%Y-%m-%d")
@@ -130,6 +137,8 @@ def pass_rate_view(request):
         data['end_date'] = end_date
         form = ProvinceDateDiffForm(initial=data)
         form.fields['provinces'].choices = [(p.id,p.name) for p in reporting_province_access(request.user)]
+        
+        dashboard_accessed.send(sender=None, request=request, data=None)
         
         return render_to_response('oppia/reports/pass-rate.html',
                                   {'form': form,
