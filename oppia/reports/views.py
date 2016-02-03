@@ -2,6 +2,7 @@
 import datetime
 import json
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect, Http404, HttpResponse
@@ -70,7 +71,7 @@ def pass_rate_view(request):
             province = Province.objects.get(pk=form.cleaned_data.get("provinces"))
             
             courses = Course.objects.filter(is_draft=False,is_archived=False)
-            districts = District.objects.filter(province=province).order_by('name')
+            districts = reporting_district_access(user=request.user,province=province).order_by('name')
             results = []
             
             for course in courses:
@@ -82,8 +83,11 @@ def pass_rate_view(request):
                     district_results = {}
                     district_results['district'] = district
                     district_results['facilities'] = []
+                    district_results['passed'] = 0
+                    district_results['failed'] = 0
+                    district_results['total'] = 0
                     
-                    facilities = Facility.objects.filter(district=district).order_by('name')
+                    facilities = reporting_facility_access(user=request.user, district=district).order_by('name')
                     
                     for facility in facilities:
                         facility_results = {}
@@ -99,7 +103,7 @@ def pass_rate_view(request):
                         for t in trackers:
                             # check it's not more than the users 3rd attempt
                             no_previous_attempts = Tracker.objects.filter(submitted_date__lt=t.submitted_date,user=t.user,digest=t.digest).count()
-                            if no_previous_attempts > 2:
+                            if no_previous_attempts > (settings.ISCHOOL_MAX_QUIZ_ATTEMPTS-1):
                                 continue
                             
                             if t.completed == True:
@@ -113,7 +117,13 @@ def pass_rate_view(request):
                         facility_results['failed'] = users_failed  
                         facility_results['total'] = len(users_failed) + len(users_passed)
                  
+                        district_results['passed'] += len(users_passed)
+                        district_results['failed'] += len(users_failed)
+                        district_results['total'] += len(users_failed) + len(users_passed)
+                        
                         district_results['facilities'].append(facility_results)
+                        
+                        
                     result['districts'].append(district_results)
                 results.append(result)   
                 

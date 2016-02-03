@@ -88,5 +88,5 @@ def modify(settings):
     
     settings['API_LIMIT_PER_PAGE'] = 0
     
-    settings['ISCHOOL_MAX_QUIZ_ATTEMPTS'] = 3
+    settings['ISCHOOL_MAX_QUIZ_ATTEMPTS'] = 5
     
