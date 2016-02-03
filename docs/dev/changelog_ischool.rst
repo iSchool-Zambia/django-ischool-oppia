@@ -9,6 +9,7 @@ Oppia Server
 * Merge from core Oppia (25 Jan 2016)
 * 20: Add models for allowing manager reporting levels - https://github.com/iSchool-Zambia/django-ischool-oppia/issues/issues/issue/20
 * 14: Update badge awarding to match the quizzes only (and only if less than 3 attempts at each quiz - https://github.com/iSchool-Zambia/django-ischool-oppia/issues/issues/issue/14
+* 23: Update reports to be aggregated by district/province - https://github.com/iSchool-Zambia/django-ischool-oppia/issues/issues/issue/23
 
 Oppia Android App
 ------------------
