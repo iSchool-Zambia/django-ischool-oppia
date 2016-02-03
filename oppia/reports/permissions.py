@@ -12,6 +12,9 @@ def reporting_access(user):
     if user.is_staff:
         return True
     
+    if not user.is_authenticated():
+        return False
+    
     specific_permission = ReportingPermissions.objects.filter(user=user)
     
     if specific_permission.count() > 0:

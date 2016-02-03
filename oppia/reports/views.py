@@ -3,6 +3,7 @@ import datetime
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils import timezone
@@ -11,10 +12,14 @@ from django.utils.translation import ugettext_lazy as _
 from oppia.models import User, UserProfile, Course, Tracker, Activity
 from oppia.profile.models import Province, District, Facility
 from oppia.reports.forms import ProvinceDateDiffForm, DateDiffForm
+from oppia.reports.permissions import *
 
 def menu_reports(request):
     # add in here any reports that need to appear in the menu
     #return [{'name': 'test', 'url':'/reports/1/'},{'name': 'test2', 'url':'/reports/2/'}]
+    if not reporting_access(request.user):
+        return None
+    
     return [
             { 'name': _(u'Unknown/Anonymous Users'),
               'url': reverse('oppia_report_incomplete_profiles')},
@@ -26,6 +31,10 @@ def menu_reports(request):
 
 
 def incomplete_profiles_view(request):
+    # check user has report permissions
+    if not reporting_access(request.user):
+        return HttpResponse('Unauthorized', status=401)
+    
     users = User.objects.filter(userprofile__location=None,is_staff=False)
     return render_to_response('oppia/reports/incomplete-profiles.html',
                               {'users': users,
@@ -45,7 +54,7 @@ def pass_rate_view(request):
     
     if request.method == 'POST':
         form = ProvinceDateDiffForm(request.POST)
-        form.fields['provinces'].choices = [(p.id,p.name) for p in Province.objects.all()]
+        form.fields['provinces'].choices = [(p.id,p.name) for p in reporting_province_access(request.user)]
         if form.is_valid():
             start_date = form.cleaned_data.get("start_date")  
             start_date = datetime.datetime.strptime(start_date,"%Y-%m-%d")
@@ -120,7 +129,7 @@ def pass_rate_view(request):
         data['start_date'] = start_date
         data['end_date'] = end_date
         form = ProvinceDateDiffForm(initial=data)
-        form.fields['provinces'].choices = [(p.id,p.name) for p in Province.objects.all()]
+        form.fields['provinces'].choices = [(p.id,p.name) for p in reporting_province_access(request.user)]
         
         return render_to_response('oppia/reports/pass-rate.html',
                                   {'form': form,

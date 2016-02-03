@@ -26,6 +26,7 @@ from oppia.permissions import get_user, get_user_courses, can_view_course, can_e
 from oppia.profile.forms import LoginForm, RegisterForm, ResetForm, ProfileForm, UploadProfileForm
 from oppia.profile.models import Province, District, Facility
 from oppia.quiz.models import Quiz, QuizAttempt
+from oppia.reports.signals import dashboard_accessed
 
 from tastypie.models import ApiKey
 
@@ -252,6 +253,8 @@ def user_activity(request, user_id):
     if response is not None:
         return response
     
+    dashboard_accessed.send(sender=None, request=request, data=None)
+    
     cohort_courses, other_courses, all_courses = get_user_courses(request, view_user) 
     
     courses = []
@@ -295,6 +298,7 @@ def user_course_activity_view(request, user_id, course_id):
     if response is not None:
         return response
     
+    dashboard_accessed.send(sender=None, request=request, data=None)
     course = can_view_course(request, course_id)
 
     act_quizzes = Activity.objects.filter(section__course=course,type=Activity.QUIZ).order_by('section__order','order')

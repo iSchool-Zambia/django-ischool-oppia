@@ -8,11 +8,11 @@ class ProvinceAdmin(admin.ModelAdmin):
     search_fields = ['name'] 
     
 class DistrictAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ('name', 'province')
     search_fields = ['name'] 
 
 class FacilityAdmin(admin.ModelAdmin):
-    list_display = ('name', 'code', 'type', 'active') 
+    list_display = ('name', 'district', 'code', 'type', 'active') 
     search_fields = ['name','type','code'] 
     
 admin.site.register(Province, ProvinceAdmin)  
