@@ -101,7 +101,7 @@ def badge_award_final_quiz(badge, hours):
                 continue # if user already has the badge then just move to next user
              
             print u        
-            user_completed = Tracker.objects.filter(user=u, course=c, completed=True, digest=final_quiz_digest).order_by('submitted_date')[:settings.ISCHOOL_MAX_QUIZ_ATTMEPTS].count()
+            user_completed = Tracker.objects.filter(user=u, course=c, completed=True, digest=final_quiz_digest).order_by('submitted_date')[:settings.ISCHOOL_MAX_QUIZ_ATTEMPTS].count()
             if user_completed > 0:
                 print c.title
                 print "-----------------------------"

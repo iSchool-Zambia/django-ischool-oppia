@@ -175,7 +175,7 @@ class Course(models.Model):
         total_completed = 0
         for act in acts:
             quiz_completed = False
-            attempts = Tracker.objects.filter(course=course,user=user,digest=act).order_by('submitted_date')[:settings.ISCHOOL_MAX_QUIZ_ATTMEPTS]
+            attempts = Tracker.objects.filter(course=course,user=user,digest=act).order_by('submitted_date')[:settings.ISCHOOL_MAX_QUIZ_ATTEMPTS]
             for a in attempts:
                 if a.completed:
                     quiz_completed = True

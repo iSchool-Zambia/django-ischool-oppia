@@ -305,7 +305,7 @@ def user_course_activity_view(request, user_id, course_id):
     quizzes = []
     for aq in act_quizzes:
         quiz = Quiz.objects.get(quizprops__value=aq.digest, quizprops__name="digest")
-        attempts = QuizAttempt.objects.filter(quiz=quiz, user=view_user).order_by('submitted_date')[:settings.ISCHOOL_MAX_QUIZ_ATTMEPTS]
+        attempts = QuizAttempt.objects.filter(quiz=quiz, user=view_user).order_by('submitted_date')[:settings.ISCHOOL_MAX_QUIZ_ATTEMPTS]
         
         max_score = None
         min_score = None
