@@ -10,6 +10,8 @@ Oppia Server
 * 20: Add models for allowing manager reporting levels - https://github.com/iSchool-Zambia/django-ischool-oppia/issues/issues/issue/20
 * 14: Update badge awarding to match the quizzes only (and only if less than 3 attempts at each quiz - https://github.com/iSchool-Zambia/django-ischool-oppia/issues/issues/issue/14
 * 23: Update reports to be aggregated by district/province - https://github.com/iSchool-Zambia/django-ischool-oppia/issues/issues/issue/23
+* 22: Split out pass/fail into 1st, 2nd, 3rd attempts - https://github.com/iSchool-Zambia/django-ischool-oppia/issues/issues/issue/22
+
 
 Oppia Android App
 ------------------

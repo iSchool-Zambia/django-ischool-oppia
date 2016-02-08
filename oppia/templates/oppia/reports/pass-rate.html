@@ -50,6 +50,9 @@
 	                 <th>{% trans 'District' %}</th>
 	                 <th>{% trans 'Facility' %}</th>
 	                 <th>{% trans 'Passed' %}</th>
+	                 {% for i in ISCHOOL_MAX_QUIZ_ATTEMPTS|get_range %}
+	                 	<th>Passed Attempt {{ i }}</th>
+	                 {% endfor %}
 	                 <th>{% trans 'Failed' %}</th>
 	                 <th>{% trans 'Total' %}</th>
 	               </tr>
@@ -59,6 +62,9 @@
 	             		<tr id='course-{{ result.course.id }}-district-{{ district.district.id }}' name="district" class="hover" title="{% trans 'Click to expand/collapse' %}">
 	             			<td colspan='2'>{{ district.district.name }}</td>
 	             			<td>{{ district.passed }}</td>
+	             			{% for i in ISCHOOL_MAX_QUIZ_ATTEMPTS|get_range %}
+			                 	<td>{{ district|get_attempt_attribute:i }}</td>
+			                 {% endfor %}
 	             			<td>{{ district.failed }}</td>
 	             			<td>{{ district.total }}</td>
 	             		</tr>
@@ -67,6 +73,9 @@
 		             			<td>&nbsp;</td>
 		             			<td>{{ facility.facility.name }}</td>
 		             			<td>{{ facility.passed|length }}</td>
+		             			{% for i in ISCHOOL_MAX_QUIZ_ATTEMPTS|get_range %}
+				                 	<td>{{ facility|get_attempt_attribute:i }}</td>
+				                {% endfor %}
 		             			<td>{{ facility.failed|length }}</td>
 		             			<td>{{ facility.total }}</td>
 		             		</tr>
@@ -79,6 +88,13 @@
 		             						<a href="{% url 'profile_user_activity' u.id %}">{{ u.first_name }} {{ u.last_name }}</a><br/>
 		             					{% endfor %}
 		             				</td>
+		             				{% for i in ISCHOOL_MAX_QUIZ_ATTEMPTS|get_range %}
+				                 		<td>
+											{% for u in facility|get_attempt_users:i %}
+			             						<a href="{% url 'profile_user_activity' u.id %}">{{ u.first_name }} {{ u.last_name }}</a><br/>
+			             					{% endfor %}
+										</td>
+				                	{% endfor %}
 		             				<td>
 		             					{% for u in facility.failed %}
 		             						<a href="{% url 'profile_user_activity' u.id %}">{{ u.first_name }} {{ u.last_name }}</a><br/>

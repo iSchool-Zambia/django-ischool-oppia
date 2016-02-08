@@ -5,6 +5,7 @@ import math
 import urllib
 
 from django import template
+from django.template import Library
 from django.template.defaultfilters import stringfilter
 from django.utils.safestring import mark_safe
 
@@ -55,3 +56,19 @@ def gravatar(user, size):
     return mark_safe(
         '<img src="{0}" alt="gravatar for {1}" class="gravatar" width="{2}" height="{2}"/>'.format(gravatar_url, user, size)
         )
+    
+@register.filter(name='get_range')
+def get_range( value ):
+    return range(1, value+1)
+
+@register.filter(name='get_attempt_attribute')
+def get_attempt_attribute(value, attempt_no):
+    if isinstance(value['passedattempt' + str(attempt_no)], set):
+        return len (value['passedattempt' + str(attempt_no)])
+    else: 
+        return value['passedattempt' + str(attempt_no)]
+    
+@register.filter(name='get_attempt_users')
+def get_attempt_users(value, attempt_no):
+    return value['passedattempt' + str(attempt_no)]
+    

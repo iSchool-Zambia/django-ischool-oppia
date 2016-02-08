@@ -26,4 +26,5 @@ def get_settings(request):
              'OPPIA_GOOGLE_ANALYTICS_CODE': settings.OPPIA_GOOGLE_ANALYTICS_CODE,
              'OPPIA_GOOGLE_ANALYTICS_DOMAIN': settings.OPPIA_GOOGLE_ANALYTICS_DOMAIN,
              'OPPIA_SHOW_GRAVATARS': settings.OPPIA_SHOW_GRAVATARS,
+             'ISCHOOL_MAX_QUIZ_ATTEMPTS' : settings.ISCHOOL_MAX_QUIZ_ATTEMPTS,
              'OPPIA_REPORTS': menu_reports(request), }

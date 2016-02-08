@@ -87,11 +87,16 @@ def pass_rate_view(request):
                     district_results['failed'] = 0
                     district_results['total'] = 0
                     
+                    for i in range(1,int(settings.ISCHOOL_MAX_QUIZ_ATTEMPTS)+1):
+                        district_results['passedattempt'+str(i)] = 0
+                    
                     facilities = reporting_facility_access(user=request.user, district=district).order_by('name')
                     
                     for facility in facilities:
                         facility_results = {}
                         facility_results['facility'] = facility
+                        for i in range(1,int(settings.ISCHOOL_MAX_QUIZ_ATTEMPTS)+1):
+                            facility_results['passedattempt'+str(i)] = 0
                         
                         # get the quizzes for the course
                         quiz_acts = Activity.objects.filter(type=Activity.QUIZ,section__course=course).exclude(section__order=0).values_list('digest', flat=True)
@@ -100,26 +105,40 @@ def pass_rate_view(request):
                         # get the total no people who passed/failed the quiz during this time
                         users_passed = []
                         users_failed = []
-                        for t in trackers:
+                        user_passed_attempts = {}
+                        for i in range(1,int(settings.ISCHOOL_MAX_QUIZ_ATTEMPTS)+1):
+                            user_passed_attempts['passedattempt'+str(i)] = []
+                            
+                        for counter, t in enumerate(trackers):
                             # check it's not more than the users 3rd attempt
                             no_previous_attempts = Tracker.objects.filter(submitted_date__lt=t.submitted_date,user=t.user,digest=t.digest).count()
                             if no_previous_attempts > (settings.ISCHOOL_MAX_QUIZ_ATTEMPTS-1):
                                 continue
                             
                             if t.completed == True:
-                                users_passed.append(t.user)
+                                if t.user not in users_passed:
+                                    users_passed.append(t.user)
+                                    user_passed_attempts['passedattempt'+str(counter+1)].append(t.user)
                             else:
-                                users_failed.append(t.user)
+                                if t.user not in users_failed:
+                                    users_failed.append(t.user)
             
                         users_failed = list(set(users_failed) - set(users_passed))
                                 
                         facility_results['passed'] = users_passed
                         facility_results['failed'] = users_failed  
                         facility_results['total'] = len(users_failed) + len(users_passed)
+                        
+                        for i in range(1,int(settings.ISCHOOL_MAX_QUIZ_ATTEMPTS)+1):
+                            facility_results['passedattempt'+str(i)] = set(user_passed_attempts['passedattempt'+str(i)])
+                        
                  
                         district_results['passed'] += len(users_passed)
                         district_results['failed'] += len(users_failed)
                         district_results['total'] += len(users_failed) + len(users_passed)
+                        
+                        for i in range(1,int(settings.ISCHOOL_MAX_QUIZ_ATTEMPTS)+1):
+                            district_results['passedattempt'+str(i)] += len(facility_results['passedattempt'+str(i)])
                         
                         district_results['facilities'].append(facility_results)
                         
