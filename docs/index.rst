@@ -14,6 +14,7 @@ Contents:
    dev/index
    author/author
    permissions
+   dashboard/index
    gamification
    viz/index
    training/index
