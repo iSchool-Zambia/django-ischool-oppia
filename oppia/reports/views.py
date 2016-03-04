@@ -40,7 +40,7 @@ def menu_reports(request):
               'url': reverse('oppia_report_incomplete_profiles')},
             { 'name': _(u'Pass/Failure Rates'),
               'url': reverse('oppia_report_pass_rate')},
-            {'name':_('Completion Rates'), 'url':reverse('oppia_completion_rates')}
+            #{'name':_('Completion Rates'), 'url':reverse('oppia_completion_rates')}
             ]
 
 
