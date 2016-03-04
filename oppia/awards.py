@@ -94,13 +94,11 @@ def badge_award_final_quiz(badge, hours):
         print "users:"
         print users
         for u in users:   
-            print u
-            if AwardCourse.objects.filter(award__user=u,course=c).count() == 0:      
-                user_completed = Tracker.objects.filter(user=u, course=c, completed=True, digest=final_quiz_digest).order_by('submitted_date')[:settings.ISCHOOL_MAX_QUIZ_ATTEMPTS].count()
+            if AwardCourse.objects.filter(award__user=u,course=c).count() == 0:
+                user_completed = Tracker.objects.filter(user=u, course=c, completed=True, digest=final_quiz_digest).values('digest').distinct().count()
                 if user_completed > 0:
                     print c.title
                     print "-----------------------------"
-                    print user_completed
                     print u.username + " AWARD BADGE"
                     award = Award()
                     award.badge = badge

@@ -33,8 +33,11 @@ from tastypie.validation import Validation
 
 from oppia.api.serializers import PrettyJSONSerializer, CourseJSONSerializer, UserJSONSerializer
 from oppia.models import Activity, Section, Tracker, Course, Media, Schedule, ActivitySchedule, Cohort, Tag, CourseTag
-from oppia.models import Points, Award, Badge, UserProfile
+
+from oppia.models import Points, Award, Badge
 from oppia.profile.forms import RegisterForm, RegisterFormAPI
+from oppia.profile.models import UserProfile
+
 from oppia.signals import course_downloaded
  
 class UserResource(ModelResource):
