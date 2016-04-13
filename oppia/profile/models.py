@@ -55,7 +55,7 @@ class UserProfile (models.Model):
     phone_number = models.TextField(blank=True, null=True, default=None)
     # ischool specific starts
     profession = models.TextField(blank=True, null=True, default=None)
-    years_in_service = models.TextField(blank=True, null=True, default=None)
+    service_entry_date = models.DateField(blank=True, null=True, default=None)
     location = models.ForeignKey(Facility, null=True, blank=True, default=None, on_delete=models.SET_NULL) 
     # ischool specific ends
 

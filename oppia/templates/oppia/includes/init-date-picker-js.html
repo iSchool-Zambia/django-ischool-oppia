@@ -9,4 +9,9 @@ function setUpDatePicker(){
     if (endDate.length) //Check if not empty jQuery object
         endDate.datepicker({dateFormat: "yy-mm-dd", defaultDate: "-1d"})
                .datepicker('setDate', endDate.val());
+               
+    serviceEntryDate = $( "#id_service_entry_date" );
+    if (serviceEntryDate.length) //Check if not empty jQuery object
+        serviceEntryDate.datepicker({dateFormat: "yy-mm-dd", defaultDate: "-1d"})
+               .datepicker('setDate', serviceEntryDate.val());
 }

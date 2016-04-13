@@ -2,6 +2,16 @@
 {% load i18n %}
 {% load crispy_forms_tags %}
 
+{% block extra_scripts %}
+	<script type="text/javascript">
+		{% include "oppia/includes/init-date-picker-js.html" %}
+	</script>
+{% endblock extra_scripts %}
+
+{% block extra_body %}
+		onload="setUpDatePicker();"
+{% endblock extra_body %}
+
 {% block extra_head_title %}
 	{{ title }}
 {% endblock extra_head_title %}

@@ -2,10 +2,21 @@
 {% load i18n %}
 {% load crispy_forms_tags %}
 {% load display_functions %}
+{% load staticfiles %}
 
 {% block extra_head_title %}
 	{% trans 'Profile' %}
 {% endblock extra_head_title %}
+
+{% block extra_scripts %}
+	<script type="text/javascript">
+		{% include "oppia/includes/init-date-picker-js.html" %}
+	</script>
+{% endblock extra_scripts %}
+
+{% block extra_body %}
+		onload="setUpDatePicker();"
+{% endblock extra_body %}
 
 {% block content %}
 

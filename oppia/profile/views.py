@@ -97,7 +97,7 @@ def register(request):
             user_profile.job_title = form.cleaned_data.get("job_title")
             user_profile.organisation = form.cleaned_data.get("organisation")
             user_profile.profession = form.cleaned_data.get("profession")
-            user_profile.years_in_service = form.cleaned_data.get("years_in_service")
+            user_profile.service_entry_date = form.cleaned_data.get("service_entry_date")
             user_profile.location = facility
             user_profile.save()
             u = authenticate(username=username, password=password)
@@ -181,7 +181,7 @@ def edit(request, user_id=0):
                 user_profile.job_title = form.cleaned_data.get("job_title")
                 user_profile.organisation = form.cleaned_data.get("organisation")
                 user_profile.profession = form.cleaned_data.get("profession")
-                user_profile.years_in_service = form.cleaned_data.get("years_in_service")
+                user_profile.service_entry_date = form.cleaned_data.get("service_entry_date")
                 user_profile.location = facility
                 user_profile.save()
             except UserProfile.DoesNotExist:
@@ -190,7 +190,7 @@ def edit(request, user_id=0):
                 user_profile.job_title = form.cleaned_data.get("job_title")
                 user_profile.organisation = form.cleaned_data.get("organisation")
                 user_profile.profession = form.cleaned_data.get("profession")
-                user_profile.years_in_service = form.cleaned_data.get("years_in_service")
+                user_profile.service_entry_date = form.cleaned_data.get("service_entry_date")
                 user_profile.location = facility
                 user_profile.save()
             messages.success(request, _(u"Profile updated"))
@@ -221,7 +221,7 @@ def edit(request, user_id=0):
                                     'job_title': user_profile.job_title,
                                     'organisation': user_profile.organisation,
                                     'profession': user_profile.profession,
-                                    'years_in_service': user_profile.years_in_service,
+                                    'service_entry_date': user_profile.service_entry_date,
                                     'location': location,})
         form.fields['location'].choices = get_location_choices()
         

@@ -81,7 +81,11 @@ class RegisterForm(forms.Form):
     job_title = forms.CharField(max_length=100,required=True)
     organisation = forms.CharField(max_length=100,required=True)
     profession = forms.CharField(max_length=100,required=True)
-    years_in_service = forms.CharField(max_length=100,required=True)
+    service_entry_date = forms.DateField(
+        required=True,
+        error_messages={'required': _('Please enter a valid date'),
+                         'invalid':_('Please enter a valid date')},
+        )
     location = forms.ChoiceField(widget=forms.Select, required=False)
     
     def __init__(self, *args, **kwargs):
@@ -101,7 +105,7 @@ class RegisterForm(forms.Form):
                                     'job_title',
                                     'organisation',
                                     'profession',
-                                    'years_in_service',
+                                    'service_entry_date',
                                     'location',
                                 Div(
                                    Submit('submit', _(u'Register'), css_class='btn btn-default'),
@@ -180,7 +184,7 @@ class RegisterFormAPI(forms.Form):
                                     'job_title',
                                     'organisation',
                                     'profession',
-                                    'years_in_service',
+                                    'service_entry_date',
                                     'location',
                                 Div(
                                    Submit('submit', _(u'Register'), css_class='btn btn-default'),
@@ -270,7 +274,11 @@ class ProfileForm(forms.Form):
     job_title = forms.CharField(max_length=100,required=True)
     organisation = forms.CharField(max_length=100,required=True)
     profession = forms.CharField(max_length=100,required=True)
-    years_in_service = forms.CharField(max_length=100,required=True)
+    service_entry_date = forms.DateField(
+        required=True,
+        error_messages={'required': _('Please enter a valid date'),
+                         'invalid':_('Please enter a valid date')},
+        )
     location = forms.ChoiceField(widget=forms.Select, required=False)
     
     def __init__(self, *args, **kwargs):
@@ -311,7 +319,7 @@ class ProfileForm(forms.Form):
                     'job_title',
                     'organisation',
                     'profession',
-                    'years_in_service',
+                    'service_entry_date',
                     'location',
                     Div(
                         HTML("""<h3>"""+_(u'Change password') + """</h3>"""),
