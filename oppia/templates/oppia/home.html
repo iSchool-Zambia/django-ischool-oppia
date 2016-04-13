@@ -2,6 +2,7 @@
 {% load i18n %} 
 {% load display_functions %} 
 {% load crispy_forms_tags %}
+{% load staticfiles %}
 
 {% block extra_head_title %}
 	{% trans 'Home' %}
@@ -26,6 +27,7 @@
 	{% include "oppia/includes/leaderboard.html" %}
 	<div><a href="{% url 'oppia_leaderboard' %}">{% trans "more..." %}</a></div>
 {% else %}
+    {% static "oppia/images/dc-logo-150x150.png" as oppia_logo %}
 	{% blocktrans %} 
 	<div style="margin:20px; text-align:center; ">
 		<img src="{{ STATIC_URL }}oppia/ischool/ischool.png"/>

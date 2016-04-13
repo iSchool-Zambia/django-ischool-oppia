@@ -1,34 +1,42 @@
 # oppia/profile/views.py
 import csv
 import datetime
-import json
+from itertools import chain
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import (authenticate, login, views)
+from django.contrib.auth import (authenticate, login)
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
-from django.db.models import Count, Max, Min, Sum, Avg
+from django.db.models import Count, Max, Min, Avg
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils import timezone
 from django.utils.translation import ugettext as _
+from tastypie.models import ApiKey
 
-from itertools import chain
-
-from oppia.forms import DateRangeForm, DateRangeIntervalForm
-from oppia.models import Points, Award, AwardCourse, Course, Tracker, Activity
+from oppia.models import Points, Award, Tracker, Activity
 from oppia.permissions import get_user, get_user_courses, can_view_course, can_edit_user
 from oppia.profile.forms import LoginForm, RegisterForm, ResetForm, ProfileForm, UploadProfileForm
 from oppia.profile.models import Province, District, Facility, UserProfile
 from oppia.quiz.models import Quiz, QuizAttempt
 from oppia.reports.signals import dashboard_accessed
 
-from tastypie.models import ApiKey
+
+def filterRedirect(requestContent):
+    redirection = requestContent.get('next')
+    # Avoid redirecting to logout after login
+    if redirection == reverse('profile_logout'):
+        print "Adios!!!"
+        return None
+
+    else:
+        print "Hola!!!"
+        return redirection
 
 
 def login_view(request):
@@ -42,8 +50,8 @@ def login_view(request):
         form = LoginForm(request.POST)
         username = request.POST.get('username')
         password = request.POST.get('password')
-        next = request.POST.get('next')
-        print next
+        next = filterRedirect(request.POST)
+
         user = authenticate(username=username, password=password)
         if user is not None and user.is_active:
             login(request,user)
@@ -52,7 +60,7 @@ def login_view(request):
             else:
                 return HttpResponseRedirect(reverse('oppia_home'))
     else:
-        form = LoginForm(initial={'next':request.GET.get('next'),})
+        form = LoginForm(initial={'next':filterRedirect(request.GET),})
         
     return render_to_response('oppia/form.html',
                               {'username': username, 
@@ -99,11 +107,12 @@ def register(request):
                     return HttpResponseRedirect('thanks/')
             return HttpResponseRedirect('thanks/') # Redirect after POST
     else:
-        form = RegisterForm(initial={'next':request.GET.get('next'),})
+        form = RegisterForm(initial={'next':filterRedirect(request.GET),})
         form.fields['location'].choices = get_location_choices()
 
-    return render_to_response('oppia/form.html', 
-                              {'form': form, 
+
+    return render_to_response('oppia/form.html',
+                              {'form': form,
                                'title': _(u'Register'), },
                                context_instance=RequestContext(request),)
 
@@ -125,16 +134,16 @@ def reset(request):
             else:
                 prefix = 'http://'
             # TODO - better way to manage email message content
-            send_mail('OppiaMobile: Password reset', 'Here is your new password for OppiaMobile: '+newpass 
-                      + '\n\nWhen you next log in you can update your password to something more memorable.' 
-                      + '\n\n' + prefix + request.META['SERVER_NAME'] , 
+            send_mail('OppiaMobile: Password reset', 'Here is your new password for OppiaMobile: '+newpass
+                      + '\n\nWhen you next log in you can update your password to something more memorable.'
+                      + '\n\n' + prefix + request.META['SERVER_NAME'] ,
                       settings.SERVER_EMAIL, [user.email], fail_silently=False)
             return HttpResponseRedirect('sent')
     else:
         form = ResetForm() # An unbound form
 
-    return render_to_response( 
-                  'oppia/form.html', 
+    return render_to_response(
+                  'oppia/form.html',
                   {'form': form,
                    'title': _(u'Reset password')},
                   context_instance=RequestContext(request))
@@ -147,7 +156,7 @@ def edit(request, user_id=0):
             return HttpResponse('Unauthorized', status=401)
     else:
         view_user = request.user
-    
+
     key = ApiKey.objects.get(user = view_user)
     if request.method == 'POST':
         form = ProfileForm(request.POST)
@@ -161,7 +170,7 @@ def edit(request, user_id=0):
             view_user.first_name = first_name
             view_user.last_name = last_name
             view_user.save()
-            
+
             try:
                 facility = Facility.objects.get(pk=form.cleaned_data.get("location"))
             except Facility.DoesNotExist:
@@ -185,7 +194,7 @@ def edit(request, user_id=0):
                 user_profile.location = facility
                 user_profile.save()
             messages.success(request, _(u"Profile updated"))
-            
+
             # if password should be changed
             password = form.cleaned_data.get("password")
             if password:
@@ -216,8 +225,9 @@ def edit(request, user_id=0):
                                     'location': location,})
         form.fields['location'].choices = get_location_choices()
         
-    return render_to_response( 
-                  'oppia/profile/profile.html', 
+
+    return render_to_response(
+                  'oppia/profile/profile.html',
                   {'form': form,},
                   context_instance=RequestContext(request))
 
@@ -236,27 +246,27 @@ def points(request):
         mypoints = paginator.page(page)
     except (EmptyPage, InvalidPage):
         mypoints = paginator.page(paginator.num_pages)
-    return render_to_response('oppia/profile/points.html', 
-                              {'page': mypoints,}, 
+    return render_to_response('oppia/profile/points.html',
+                              {'page': mypoints,},
                               context_instance=RequestContext(request),)
 
 def badges(request):
     awards = Award.objects.filter(user=request.user).order_by('-award_date')
-    return render_to_response('oppia/profile/badges.html', 
+    return render_to_response('oppia/profile/badges.html',
                               {'awards': awards,},
                               context_instance=RequestContext(request),)
 
 
 def user_activity(request, user_id):
-    
+
     view_user, response = get_user(request, user_id)
     if response is not None:
         return response
-    
+
     dashboard_accessed.send(sender=None, request=request, data=None)
-    
-    cohort_courses, other_courses, all_courses = get_user_courses(request, view_user) 
-    
+
+    cohort_courses, other_courses, all_courses = get_user_courses(request, view_user)
+
     courses = []
     for course in all_courses:
         data = {'course': course,
@@ -266,15 +276,15 @@ def user_activity(request, user_id):
                 'no_points': course.get_points(course,view_user),
                 'no_badges': course.get_badges(course,view_user),}
         courses.append(data)
-    
+
     activity = []
     start_date = timezone.now() - datetime.timedelta(days=31)
     end_date = timezone.now()
     no_days = (end_date-start_date).days + 1
-    
+
     course_ids = list(chain(cohort_courses.values_list('id',flat=True),other_courses.values_list('id',flat=True)))
-    trackers = Tracker.objects.filter(course__id__in=course_ids, 
-                                      user=view_user, 
+    trackers = Tracker.objects.filter(course__id__in=course_ids,
+                                      user=view_user,
                                       tracker_date__gte=start_date,
                                       tracker_date__lte=end_date) \
                                       .extra({'activity_date':"date(tracker_date)"}) \
@@ -284,19 +294,19 @@ def user_activity(request, user_id):
         temp = start_date + datetime.timedelta(days=i)
         count = next((dct['count'] for dct in trackers if dct['activity_date'] == temp.date()), 0)
         activity.append([temp.strftime("%d %b %Y"),count])
-        
+
     return render_to_response('oppia/profile/user-scorecard.html',
                               {'view_user': view_user,
-                               'courses': courses, 
-                               'activity_graph_data': activity }, 
+                               'courses': courses,
+                               'activity_graph_data': activity },
                               context_instance=RequestContext(request))
 
 def user_course_activity_view(request, user_id, course_id):
-    
+
     view_user, response = get_user(request, user_id)
     if response is not None:
         return response
-    
+
     dashboard_accessed.send(sender=None, request=request, data=None)
     course = can_view_course(request, course_id)
 
@@ -313,27 +323,19 @@ def user_course_activity_view(request, user_id, course_id):
         latest_score = None
         
         if attempts.count() > 0:
-            max_score = 0
-            min_score = 100
-            avg_score = 0
-            first_score = 0
-            latest_score = 0
-            for counter, a in enumerate(attempts):
-                if 100*float(a.score)/float(a.maxscore) > max_score:
-                    max_score = 100*float(a.score)/float(a.maxscore) 
-           
-                if 100*float(a.score)/float(a.maxscore) < min_score:
-                    min_score = 100*float(a.score)/float(a.maxscore) 
-                
-                if counter == 0:
-                    first_score = 100*float(a.score)/float(a.maxscore)
-                    
-                if counter + 1 == attempts.count():
-                    latest_score = 100*float(a.score)/float(a.maxscore)
-                    
-                avg_score += 100*float(a.score)/float(a.maxscore)
-                
-            avg_score = avg_score/attempts.count()
+            max_score = 100*float(attempts.aggregate(max=Max('score'))['max']) / float(attempts[0].maxscore)
+            min_score = 100*float(attempts.aggregate(min=Min('score'))['min']) / float(attempts[0].maxscore)
+            avg_score = 100*float(attempts.aggregate(avg=Avg('score'))['avg']) / float(attempts[0].maxscore)
+            first_date = attempts.aggregate(date=Min('attempt_date'))['date']
+            recent_date = attempts.aggregate(date=Max('attempt_date'))['date']
+            first_score = 100*float(attempts.filter(attempt_date = first_date)[0].score) / float(attempts[0].maxscore)
+            latest_score = 100*float(attempts.filter(attempt_date = recent_date)[0].score) / float(attempts[0].maxscore)
+        else:
+            max_score = None
+            min_score = None
+            avg_score = None
+            first_score = None
+            latest_score = None
 
         quiz = {'quiz': aq,
                 'no_attempts': attempts.count(),
@@ -344,14 +346,14 @@ def user_course_activity_view(request, user_id, course_id):
                 'avg_score': avg_score,
                  }
         quizzes.append(quiz);
-    
+
     activity = []
     start_date = timezone.now() - datetime.timedelta(days=31)
     end_date = timezone.now()
     no_days = (end_date-start_date).days + 1
-    
-    trackers = Tracker.objects.filter(course=course, 
-                                      user=view_user, 
+
+    trackers = Tracker.objects.filter(course=course,
+                                      user=view_user,
                                       tracker_date__gte=start_date,
                                       tracker_date__lte=end_date) \
                                       .extra({'activity_date':"date(tracker_date)"}) \
@@ -361,18 +363,18 @@ def user_course_activity_view(request, user_id, course_id):
         temp = start_date + datetime.timedelta(days=i)
         count = next((dct['count'] for dct in trackers if dct['activity_date'] == temp.date()), 0)
         activity.append([temp.strftime("%d %b %Y"),count])
-    
+
     return render_to_response('oppia/profile/user-course-scorecard.html',
                               {'view_user': view_user,
-                               'course': course, 
-                               'quizzes': quizzes, 
-                               'activity_graph_data': activity }, 
+                               'course': course,
+                               'quizzes': quizzes,
+                               'activity_graph_data': activity },
                               context_instance=RequestContext(request))
 
 def upload_view(request):
     if not request.user.is_staff:
         raise Http404
-    
+
     if request.method == 'POST': # if form submitted...
         form = UploadProfileForm(request.POST,request.FILES)
         if form.is_valid():
@@ -392,10 +394,10 @@ def upload_view(request):
                             result['message'] = _(u'No %s set' % rf)
                             results.append(result)
                             all_defined = False
-                        
-                    if not all_defined:    
+
+                    if not all_defined:
                         continue
-                    
+
                     user = User()
                     user.username = row['username'].replace('/','_')
                     user.first_name = row['firstname']
@@ -453,13 +455,13 @@ def upload_view(request):
                 result['created'] = False
                 result['message'] = _(u'Could not parse file')
                 results.append(result)
-            
+
     else:
         results = []
         form = UploadProfileForm()
-        
-    return render_to_response('oppia/profile/upload.html', 
-                              {'form': form, 
+
+    return render_to_response('oppia/profile/upload.html',
+                              {'form': form,
                                'results': results},
                               context_instance=RequestContext(request),)
     
