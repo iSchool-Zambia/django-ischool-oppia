@@ -27,11 +27,25 @@
 	{% include "oppia/includes/leaderboard.html" %}
 	<div><a href="{% url 'oppia_leaderboard' %}">{% trans "more..." %}</a></div>
 {% else %}
-    {% static "oppia/images/dc-logo-150x150.png" as oppia_logo %}
+    {% static "oppia/logo/moh.png" as mohlogo %}
+    {% static "oppia/logo/pepfar.jpg" as pepfarlogo %}
+    {% static "oppia/logo/cdc.png" as cdclogo %}
+    {% static "oppia/logo/jhpiego.png" as jhpiegologo %}
+    {% static "oppia/logo/ischool.png" as ischoollogo %}
 	{% blocktrans %} 
 	<div style="margin:20px; text-align:center; ">
-		<img src="{{ STATIC_URL }}oppia/ischool/ischool.png"/>
+		<img src="{{ mohlogo }}"/>
+		<h2>Welcome to MoH eHealth Training</h2>
 	</div>
+	
+	<div style="margin:50px 20px 20px 20px; text-align:center; ">
+		<h3>Partners</h3>
+		<img src="{{ pepfarlogo }}" height="70px" style="margin:20px;"/>
+		<img src="{{ cdclogo }}" height="70px" style="margin:20px;"/>
+		<img src="{{ jhpiegologo }}" height="70px" style="margin:20px;"/>
+		<img src="{{ ischoollogo }}" height="70px" style="margin:20px;"/>
+	</div>
+	
 	{% endblocktrans %}
 
 {% endif %} 
