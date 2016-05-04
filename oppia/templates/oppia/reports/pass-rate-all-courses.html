@@ -103,6 +103,15 @@
 		             		{% endif %}
 	             		{% endfor %}
 	             	{% endfor %}
+	             	<tr>
+	                 <th colspan="2">{% trans 'Total for province' %}</th>
+	                 <th>{{ results.province_summary.passed }}</th>
+	                 {% for i in ISCHOOL_MAX_QUIZ_ATTEMPTS|get_range %}
+	                 	<th>{{ results.province_summary|get_attempt_attribute:i }}</th>
+	                 {% endfor %}
+	                 <th>{{ results.province_summary.failed }}</th>
+	                 <th>{{ results.province_summary.total }}</th>
+	               </tr>
 	             </tbody>
 		   </table>
 		</div>

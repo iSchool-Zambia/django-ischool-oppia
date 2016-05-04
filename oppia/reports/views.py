@@ -301,7 +301,24 @@ def pass_rate_view_all_courses(request):
                     
                     
                 results['districts'].append(district_results)  
-                
+            
+            # Create the totals for the province (all districts)
+            province_summary = {}
+            province_summary['passed'] = 0
+            province_summary['failed'] = 0
+            province_summary['total'] = 0
+            
+            for i in range(1,int(settings.ISCHOOL_MAX_QUIZ_ATTEMPTS)+1):
+                province_summary['passedattempt'+str(i)] = 0
+             
+            for d in results['districts']:
+                province_summary['passed'] += d['passed']
+                province_summary['failed'] += d['failed']
+                province_summary['total'] += d['total']
+                for i in range(1,int(settings.ISCHOOL_MAX_QUIZ_ATTEMPTS)+1):
+                       province_summary['passedattempt'+str(i)] += d['passedattempt'+str(i)]
+                       
+            results['province_summary'] = province_summary    
                 
             return render_to_response('oppia/reports/pass-rate-all-courses.html',
                                   {'results': results,
