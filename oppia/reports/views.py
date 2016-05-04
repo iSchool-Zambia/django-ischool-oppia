@@ -39,8 +39,10 @@ def menu_reports(request):
     return [
             { 'name': _(u'Unknown/Anonymous Users'),
               'url': reverse('oppia_report_incomplete_profiles')},
-            { 'name': _(u'Pass/Failure Rates'),
-              'url': reverse('oppia_report_pass_rate')},
+            { 'name': _(u'Pass/Failure Rates - by Course'),
+              'url': reverse('oppia_report_pass_rate_by_course')},
+            { 'name': _(u'Pass/Failure Rates - all Courses'),
+              'url': reverse('oppia_report_pass_rate_all_courses')},
             #{'name':_('Completion Rates'), 'url':reverse('oppia_completion_rates')}
             ]
 
@@ -64,7 +66,7 @@ type (e.g. ART), by district and by facility per quarter or year or specified pe
 2. How many providers failed the eLearning course in each Province by Course type (e.g. ART), by
 district and by facility per quarter or year or specified period?
 '''  
-def pass_rate_view(request):
+def pass_rate_view_by_course(request):
     
     start_date = timezone.now() - datetime.timedelta(days=31)
     end_date = timezone.now()
@@ -159,7 +161,7 @@ def pass_rate_view(request):
                     result['districts'].append(district_results)
                 results.append(result)   
                 
-                # Create the totals for the course (all districts
+                # Create the totals for the course (all districts)
                 course_summary = {}
                 course_summary['passed'] = 0
                 course_summary['failed'] = 0
@@ -177,7 +179,7 @@ def pass_rate_view(request):
                            
                 result['course_summary'] = course_summary
                 
-            return render_to_response('oppia/reports/pass-rate.html',
+            return render_to_response('oppia/reports/pass-rate-by-course.html',
                                   {'results': results,
                                    'form': form,
                                    'start_date': start_date,
@@ -185,7 +187,7 @@ def pass_rate_view(request):
                                    'province': province,
                                    }, 
                                   context_instance=RequestContext(request))
-        return render_to_response('oppia/reports/pass-rate.html',
+        return render_to_response('oppia/reports/pass-rate-by-course.html',
                                   {'form': form,
                                    'start_date': start_date,
                                    'end_date': end_date,
@@ -200,14 +202,137 @@ def pass_rate_view(request):
         
         dashboard_accessed.send(sender=None, request=request, data=None)
         
-        return render_to_response('oppia/reports/pass-rate.html',
+        return render_to_response('oppia/reports/pass-rate-by-course.html',
                                   {'form': form,
                                    'start_date': start_date,
                                    'end_date': end_date,
                                    }, 
                                   context_instance=RequestContext(request))
      
-     
+ 
+def pass_rate_view_all_courses(request):
+    
+    start_date = timezone.now() - datetime.timedelta(days=31)
+    end_date = timezone.now()
+    
+    if request.method == 'POST':
+        form = ProvinceDateDiffForm(request.POST)        
+        form.fields['provinces'].choices = [(p.id,p.name) for p in reporting_province_access(request.user)]
+        
+        dashboard_accessed.send(sender=None, request=request, data=json.dumps(request.POST))
+        
+        if form.is_valid():
+            start_date = form.cleaned_data.get("start_date")  
+            start_date = datetime.datetime.strptime(start_date,"%Y-%m-%d")
+            end_date = form.cleaned_data.get("end_date")
+            # add one extra day so works out on (eg) before 2016-05-04 00:00:00 rather than 2016-05-03 00:00:00 when 2016-05-03 is the selected date
+            end_date = datetime.datetime.strptime(end_date,"%Y-%m-%d") + relativedelta(days=1) 
+            province = Province.objects.get(pk=form.cleaned_data.get("provinces"))
+            
+            courses = Course.objects.filter(is_draft=False,is_archived=False)
+            districts = reporting_district_access(user=request.user,province=province).order_by('name')
+            results = {}
+            results['districts'] = []             
+                
+            for district in districts:
+                district_results = {}
+                district_results['district'] = district
+                district_results['facilities'] = []
+                district_results['passed'] = 0
+                district_results['failed'] = 0
+                district_results['total'] = 0
+                
+                for i in range(1,int(settings.ISCHOOL_MAX_QUIZ_ATTEMPTS)+1):
+                    district_results['passedattempt'+str(i)] = 0
+                
+                facilities = reporting_facility_access(user=request.user, district=district).order_by('name')
+                
+                for facility in facilities:
+                    facility_results = {}
+                    facility_results['facility'] = facility
+                    for i in range(1,int(settings.ISCHOOL_MAX_QUIZ_ATTEMPTS)+1):
+                        facility_results['passedattempt'+str(i)] = 0
+                    
+                    
+                    users_passed = []
+                    users_failed = []
+                    user_passed_attempts = {}
+                    for i in range(1,int(settings.ISCHOOL_MAX_QUIZ_ATTEMPTS)+1):
+                        user_passed_attempts['passedattempt'+str(i)] = []
+                            
+                    for course in courses:
+                        # get the quizzes for the course
+                        quiz_acts = Activity.objects.filter(type=Activity.QUIZ,section__course=course).exclude(section__order=0).values_list('digest', flat=True)
+                        trackers = Tracker.objects.filter(submitted_date__gte=start_date, submitted_date__lte=end_date,digest__in=quiz_acts, user__userprofile__location=facility)
+                    
+                        # get the total no people who passed/failed the quiz during this time
+                        for counter, t in enumerate(trackers):
+                            # check it's not more than the users 3rd attempt
+                            no_previous_attempts = Tracker.objects.filter(submitted_date__lt=t.submitted_date,user=t.user,digest=t.digest).count()
+                            if no_previous_attempts > (settings.ISCHOOL_MAX_QUIZ_ATTEMPTS-1):
+                                continue
+                            
+                            if t.completed == True:
+                                if t.user not in users_passed:
+                                    users_passed.append(t.user)
+                                    user_passed_attempts['passedattempt'+str(counter+1)].append(t.user)
+                            else:
+                                if t.user not in users_failed:
+                                    users_failed.append(t.user)
+        
+                    users_failed = list(set(users_failed) - set(users_passed))
+                            
+                    facility_results['passed'] = users_passed
+                    facility_results['failed'] = users_failed  
+                    facility_results['total'] = len(users_failed) + len(users_passed)
+                    
+                    for i in range(1,int(settings.ISCHOOL_MAX_QUIZ_ATTEMPTS)+1):
+                        facility_results['passedattempt'+str(i)] = set(user_passed_attempts['passedattempt'+str(i)])
+                    
+             
+                    district_results['passed'] += len(users_passed)
+                    district_results['failed'] += len(users_failed)
+                    district_results['total'] += len(users_failed) + len(users_passed)
+                    
+                    for i in range(1,int(settings.ISCHOOL_MAX_QUIZ_ATTEMPTS)+1):
+                        district_results['passedattempt'+str(i)] += len(facility_results['passedattempt'+str(i)])
+                    
+                    district_results['facilities'].append(facility_results)
+                    
+                    
+                results['districts'].append(district_results)  
+                
+                
+            return render_to_response('oppia/reports/pass-rate-all-courses.html',
+                                  {'results': results,
+                                   'form': form,
+                                   'start_date': start_date,
+                                   'end_date': end_date,
+                                   'province': province,
+                                   }, 
+                                  context_instance=RequestContext(request))
+        return render_to_response('oppia/reports/pass-rate-all-courses.html',
+                                  {'form': form,
+                                   'start_date': start_date,
+                                   'end_date': end_date,
+                                   }, 
+                                  context_instance=RequestContext(request))
+    else:
+        data = {}
+        data['start_date'] = start_date
+        data['end_date'] = end_date
+        form = ProvinceDateDiffForm(initial=data)
+        form.fields['provinces'].choices = [(p.id,p.name) for p in reporting_province_access(request.user)]
+        
+        dashboard_accessed.send(sender=None, request=request, data=None)
+        
+        return render_to_response('oppia/reports/pass-rate-all-courses.html',
+                                  {'form': form,
+                                   'start_date': start_date,
+                                   'end_date': end_date,
+                                   }, 
+                                  context_instance=RequestContext(request))
+            
 '''
 3. For any specified period, how many providers undertook the eLearning course?  How many failed to complete the course?
 4. How many providers passed the eLearning course with a score of 80% or higher?

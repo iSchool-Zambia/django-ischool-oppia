@@ -5,7 +5,7 @@
 
 
 {% block extra_head_title %}
-	{% trans 'Pass/Failure Rates' %}
+	{% trans 'Pass/Failure Rates - all Courses' %}
 {% endblock extra_head_title %}
 
 {% block extra_scripts %}
@@ -33,15 +33,13 @@
 
 {% block content %}
 
-<h2>{% trans 'Pass/Failure Rates' %}</h2>
+<h2>{% trans 'Pass/Failure Rates - all Courses' %}</h2>
 
 {% crispy form %}
 
 {% if province %}
 	<h3>{{ province.name }} results for {{ start_date|date:"Y-m-d" }} to {{ end_date|date:"Y-m-d" }}</h3>
 	
-	{% for result in results %}
-		<h3>{% trans 'Course' %}: {{ result.course.title|title_lang:LANGUAGE_CODE }}</h3>
 		<div class="table-responsive">
 			<table class="table">
 				<thead>
@@ -58,8 +56,8 @@
 	               </tr>
 	             </thead>
 	             <tbody>
-	             	{% for district in result.districts %}
-	             		<tr id='course-{{ result.course.id }}-district-{{ district.district.id }}' name="district" class="hover" title="{% trans 'Click to expand/collapse' %}">
+	             	{% for district in results.districts %}
+	             		<tr id='district-{{ district.district.id }}' name="district" class="hover" title="{% trans 'Click to expand/collapse' %}">
 	             			<td colspan='2'>{{ district.district.name }}</td>
 	             			<td>{{ district.passed }}</td>
 	             			{% for i in ISCHOOL_MAX_QUIZ_ATTEMPTS|get_range %}
@@ -69,7 +67,7 @@
 	             			<td>{{ district.total }}</td>
 	             		</tr>
 	             		{% for facility in district.facilities %}
-		             		<tr name="detail-course-{{ result.course.id }}-district-{{ district.district.id }}">
+		             		<tr name="detail-district-{{ district.district.id }}">
 		             			<td>&nbsp;</td>
 		             			<td>{{ facility.facility.name }}</td>
 		             			<td>{{ facility.passed|length }}</td>
@@ -80,7 +78,7 @@
 		             			<td>{{ facility.total }}</td>
 		             		</tr>
 		             		{% if facility.total > 0 %}
-		             			<tr name="detail-course-{{ result.course.id }}-district-{{ district.district.id }}">
+		             			<tr name="detail-district-{{ district.district.id }}">
 		             				<td>&nbsp;</td>
 		             				<td>&nbsp;</td>
 		             				<td>
@@ -105,19 +103,8 @@
 		             		{% endif %}
 	             		{% endfor %}
 	             	{% endfor %}
-	             	<tr>
-	                 <th colspan="2">{% trans 'Total for course' %}</th>
-	                 <th>{{ result.course_summary.passed }}</th>
-	                 {% for i in ISCHOOL_MAX_QUIZ_ATTEMPTS|get_range %}
-	                 	<th>{{ result.course_summary|get_attempt_attribute:i }}</th>
-	                 {% endfor %}
-	                 <th>{{ result.course_summary.failed }}</th>
-	                 <th>{{ result.course_summary.total }}</th>
-	               </tr>
 	             </tbody>
 		   </table>
 		</div>
-			              
-	{% endfor %}
 {% endif %}
 {% endblock %}
