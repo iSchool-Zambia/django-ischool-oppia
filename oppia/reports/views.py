@@ -3,6 +3,8 @@
 import datetime
 import json
 
+from dateutil.relativedelta import relativedelta
+
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.http.response import HttpResponse, Http404
@@ -11,7 +13,6 @@ from django.template import RequestContext
 from django.utils.translation import ugettext_lazy as _
 
 from oppia.models import Course, Badge, Award, AwardCourse
-
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -78,7 +79,8 @@ def pass_rate_view(request):
             start_date = form.cleaned_data.get("start_date")  
             start_date = datetime.datetime.strptime(start_date,"%Y-%m-%d")
             end_date = form.cleaned_data.get("end_date")
-            end_date = datetime.datetime.strptime(end_date,"%Y-%m-%d")      
+            # add one extra day so works out on (eg) before 2016-05-04 00:00:00 rather than 2016-05-03 00:00:00 when 2016-05-03 is the selected date
+            end_date = datetime.datetime.strptime(end_date,"%Y-%m-%d") + relativedelta(days=1) 
             province = Province.objects.get(pk=form.cleaned_data.get("provinces"))
             
             courses = Course.objects.filter(is_draft=False,is_archived=False)
@@ -156,6 +158,24 @@ def pass_rate_view(request):
                         
                     result['districts'].append(district_results)
                 results.append(result)   
+                
+                # Create the totals for the course (all districts
+                course_summary = {}
+                course_summary['passed'] = 0
+                course_summary['failed'] = 0
+                course_summary['total'] = 0
+                
+                for i in range(1,int(settings.ISCHOOL_MAX_QUIZ_ATTEMPTS)+1):
+                    course_summary['passedattempt'+str(i)] = 0
+                 
+                for d in result['districts']:
+                    course_summary['passed'] += d['passed']
+                    course_summary['failed'] += d['failed']
+                    course_summary['total'] += d['total']
+                    for i in range(1,int(settings.ISCHOOL_MAX_QUIZ_ATTEMPTS)+1):
+                           course_summary['passedattempt'+str(i)] += d['passedattempt'+str(i)]
+                           
+                result['course_summary'] = course_summary
                 
             return render_to_response('oppia/reports/pass-rate.html',
                                   {'results': results,

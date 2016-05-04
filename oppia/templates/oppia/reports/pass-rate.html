@@ -105,6 +105,15 @@
 		             		{% endif %}
 	             		{% endfor %}
 	             	{% endfor %}
+	             	<tr>
+	                 <th colspan="2">{% trans 'Total for course' %}</th>
+	                 <th>{{ result.course_summary.passed }}</th>
+	                 {% for i in ISCHOOL_MAX_QUIZ_ATTEMPTS|get_range %}
+	                 	<th>{{ result.course_summary|get_attempt_attribute:i }}</th>
+	                 {% endfor %}
+	                 <th>{{ result.course_summary.failed }}</th>
+	                 <th>{{ result.course_summary.total }}</th>
+	               </tr>
 	             </tbody>
 		   </table>
 		</div>
