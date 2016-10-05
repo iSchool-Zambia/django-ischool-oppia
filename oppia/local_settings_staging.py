@@ -60,6 +60,8 @@ def modify(settings):
         'GPS':False,
     }
 
+    settings['STAGING'] = True
+    
     settings['OPPIA_ALLOW_SELF_REGISTRATION'] = True    # turns on/off ability for users to self register
 
     settings['OPPIA_SHOW_GRAVATARS'] = True
@@ -91,7 +93,7 @@ def modify(settings):
     
     settings['ISCHOOL_MAX_QUIZ_ATTEMPTS'] = 3
 
-    settings['DEVICE_ADMIN_ENABLED'] = True
+    settings['DEVICE_ADMIN_ENABLED'] = False
 
     if settings['DEVICE_ADMIN_ENABLED']:
         settings['INSTALLED_APPS'] += ('oppia.deviceadmin', 'gcm',)

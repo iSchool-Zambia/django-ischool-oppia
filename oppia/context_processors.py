@@ -18,7 +18,14 @@ def get_points(request):
 
 def get_version(request):
     version = "v" + str(oppia.VERSION[0]) + "." + str(oppia.VERSION[1]) + "." + str(oppia.VERSION[2])
-    return {'version': version }
+    
+    if getattr(settings, 'STAGING', False):
+        staging = True
+    else:
+        staging = False
+    
+    return {'version': version,
+            'STAGING': staging}
 
 def get_settings(request):
     return { 'OPPIA_ALLOW_SELF_REGISTRATION': settings.OPPIA_ALLOW_SELF_REGISTRATION,
