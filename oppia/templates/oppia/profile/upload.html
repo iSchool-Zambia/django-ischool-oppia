@@ -12,10 +12,13 @@
 <h2>{% trans 'Upload users' %}</h2>
 
 {% blocktrans %}
-<p>You may only upload a 'CSV' file. Note that the column headings must be exactly as shown below, although the ordering is unimportant. Additional columns may be supplied, but they will be ignored.</p>
+<p>You may only upload a 'CSV' file, a .xls or .xlsx file will not work. From Excel you can easily 'save as' a '.csv' file.</p>
+
+
+<p>Note that the column headings must be exactly as shown below, although the ordering is unimportant. Additional columns may be supplied, but they will be ignored.</p>
 <p>The following columns/fields are required:</p>
 <ul>
-	<li>username</li>
+	<li>username - the NRC ID should be entered with the forward slashes replaced with underscores, eg '123456_78_9'</li>
 	<li>email</li>
 	<li>firstname</li>
 	<li>lastname</li>
@@ -28,7 +31,7 @@
 	<li>organisation</li>
 	<li>phone_no</li>
 	<li>profession</li>
-	<li>service_entry_date</li>
+	<li>service_entry_date - this should be entered in the format: YYYY-MM-DD</li>
 </ul>
 
 {% endblocktrans %}
